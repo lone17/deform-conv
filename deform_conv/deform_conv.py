@@ -78,16 +78,19 @@ def tf_batch_map_coordinates(input, coords, order=1):
 
     Parameters
     ----------
-    input : tf.Tensor. shape = (b, s, s)
+    input : tf.Tensor. shape = (b, h, w)
     coords : tf.Tensor. shape = (b, n_points, 2)
     """
 
     input_shape = tf.shape(input)
     batch_size = input_shape[0]
-    input_size = input_shape[1]
+    input_height = input_shape[1]
+    input_width = input_shape[2]
     n_coords = tf.shape(coords)[1]
 
-    coords = tf.clip_by_value(coords, 0, tf.cast(input_size, 'float32') - 1)
+    clipped_x = tf.clip_by_value(coords[..., 0], 0, tf.cast(input_width, 'float32') - 1)
+    clipped_y = tf.clip_by_value(coords[..., 1], 0, tf.cast(input_height, 'float32') - 1)
+    coords = tf.stack([clipped_x, clipped_y], axis=-1)
     coords_lt = tf.cast(tf.floor(coords), 'int32')
     coords_rb = tf.cast(tf.ceil(coords), 'int32')
     coords_lb = tf.stack([coords_lt[..., 0], coords_rb[..., 1]], axis=-1)
@@ -137,20 +140,23 @@ def tf_batch_map_offsets(input, offsets, order=1):
 
     Parameters
     ---------
-    input : tf.Tensor. shape = (b, s, s)
-    offsets: tf.Tensor. shape = (b, s, s, 2)
+    input : tf.Tensor. shape = (b, h, w)
+    offsets: tf.Tensor. shape = (b, h, w, 2)
     """
 
     input_shape = tf.shape(input)
     batch_size = input_shape[0]
-    input_size = input_shape[1]
+    input_height = input_shape[1]
+    input_width = input_shape[2]
+    input_bigger_size = tf.maximum(input_height, input_width)
 
     offsets = tf.reshape(offsets, (batch_size, -1, 2))
     grid = tf.meshgrid(
-        tf.range(input_size), tf.range(input_size), indexing='ij'
+        tf.range(input_bigger_size), tf.range(input_bigger_size), indexing='ij'
     )
     grid = tf.stack(grid, axis=-1)
     grid = tf.cast(grid, 'float32')
+    grid = grid[:input_height, :input_width]
     grid = tf.reshape(grid, (-1, 2))
     grid = tf_repeat_2d(grid, batch_size)
     coords = offsets + grid

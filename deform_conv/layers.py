@@ -24,7 +24,7 @@ class ConvOffset2D(Conv2D):
 
     def call(self, x):
         # TODO offsets probably have no nonlinearity?
-        x_shape = x.get_shape()
+        x_shape = tf.shape(x)
         offsets = super(ConvOffset2D, self).call(x)
 
         offsets = self._to_bc_h_w_2(offsets, x_shape)
@@ -40,21 +40,21 @@ class ConvOffset2D(Conv2D):
     def _to_bc_h_w_2(x, x_shape):
         """(b, h, w, 2c) -> (b*c, h, w, 2)"""
         x = tf.transpose(x, [0, 3, 1, 2])
-        x = tf.reshape(x, (-1, int(x_shape[1]), int(x_shape[2]), 2))
+        x = tf.reshape(x, (-1, x_shape[1], x_shape[2], 2))
         return x
 
     @staticmethod
     def _to_bc_h_w(x, x_shape):
         """(b, h, w, c) -> (b*c, h, w)"""
         x = tf.transpose(x, [0, 3, 1, 2])
-        x = tf.reshape(x, (-1, int(x_shape[1]), int(x_shape[2])))
+        x = tf.reshape(x, (-1, x_shape[1], x_shape[2]))
         return x
 
     @staticmethod
     def _to_b_h_w_c(x, x_shape):
         """(b*c, h, w) -> (b, h, w, c)"""
         x = tf.reshape(
-            x, (-1, int(x_shape[3]), int(x_shape[1]), int(x_shape[2]))
+            x, (-1, x_shape[3], x_shape[1], x_shape[2])
         )
         x = tf.transpose(x, [0, 2, 3, 1])
         return x
