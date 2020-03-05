@@ -134,9 +134,9 @@ def Unet(pretrained_weights=None, input_size=(None, None, 3), num_filters=32,
                  normal_conv_trainable=normal_conv_trainable)
     
     key_mask = Conv2D(1, 1, activation='sigmoid', name='key_mask', 
-                      normal_conv_trainable=normal_conv_trainable)(conv9)
+                      trainable=normal_conv_trainable)(conv9)
     value_mask = Conv2D(1, 1, activation='sigmoid', name='value_mask', 
-                        normal_conv_trainable=normal_conv_trainable)(conv9)
+                        trainable=normal_conv_trainable)(conv9)
     
     model = Model(input=input, outputs=[key_mask, value_mask])
     
