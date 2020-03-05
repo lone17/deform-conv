@@ -14,12 +14,8 @@ class ConvOffset2D(Conv2D):
                  **kwargs):
         """Init"""
 
+        self.filters = filters
         self.channel_wise = channel_wise
-        
-    def call(self, x):
-        # TODO offsets probably have no nonlinearity?
-        x_shape = tf.shape(x)
-        self.filters = x_shape[-1]
         if self.channel_wise:
             super(ConvOffset2D, self).__init__(
                 self.filters * 2, (3, 3), padding='same', use_bias=False,
@@ -37,6 +33,9 @@ class ConvOffset2D(Conv2D):
                 **kwargs
             )
 
+    def call(self, x):
+        # TODO offsets probably have no nonlinearity?
+        x_shape = tf.shape(x)
         offsets = super(ConvOffset2D, self).call(x)
         
         if self.channel_wise:
