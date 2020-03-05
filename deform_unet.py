@@ -70,49 +70,73 @@ def Unet(pretrained_weights=None, input_size=(None, None, 3), num_filters=32,
     
     input = Input(input_size)
     
-    conv1 = Conv(input, num_filters, use_deform=False, trainable=normal_conv_trainable)
-    conv1 = Conv(conv1, num_filters, use_deform=False, trainable=normal_conv_trainable)
+    conv1 = Conv(input, num_filters, use_deform=False, 
+                 normal_conv_trainable=normal_conv_trainable)
+    conv1 = Conv(conv1, num_filters, use_deform=False, 
+                 normal_conv_trainable=normal_conv_trainable)
     pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
     
-    conv2 = Conv(pool1, num_filters*2, use_deform, trainable=normal_conv_trainable)
-    conv2 = Conv(conv2, num_filters*2, use_deform, trainable=normal_conv_trainable)
+    conv2 = Conv(pool1, num_filters*2, use_deform, 
+                 normal_conv_trainable=normal_conv_trainable)
+    conv2 = Conv(conv2, num_filters*2, use_deform, 
+                 normal_conv_trainable=normal_conv_trainable)
     pool2 = MaxPooling2D(pool_size=(2, 2))(conv2)
     
-    conv3 = Conv(pool2, num_filters*4, use_deform, trainable=normal_conv_trainable)
-    conv3 = Conv(conv3, num_filters*4, use_deform, trainable=normal_conv_trainable)
+    conv3 = Conv(pool2, num_filters*4, use_deform, 
+                 normal_conv_trainable=normal_conv_trainable)
+    conv3 = Conv(conv3, num_filters*4, use_deform, 
+                 normal_conv_trainable=normal_conv_trainable)
     pool3 = MaxPooling2D(pool_size=(2, 2))(conv3)
     
-    conv4 = Conv(pool3, num_filters*8, use_deform, trainable=normal_conv_trainable)
-    conv4 = Conv(conv4, num_filters*8, use_deform, trainable=normal_conv_trainable)
+    conv4 = Conv(pool3, num_filters*8, use_deform, 
+                 normal_conv_trainable=normal_conv_trainable)
+    conv4 = Conv(conv4, num_filters*8, use_deform, 
+                 normal_conv_trainable=normal_conv_trainable)
     drop4 = Dropout(0.5)(conv4)
     pool4 = MaxPooling2D(pool_size=(2, 2))(drop4)
     
-    conv5 = Conv(pool4, num_filters*16, use_deform, trainable=normal_conv_trainable)
-    conv5 = Conv(conv5, num_filters*16, use_deform, trainable=normal_conv_trainable)
+    conv5 = Conv(pool4, num_filters*16, use_deform, 
+                 normal_conv_trainable=normal_conv_trainable)
+    conv5 = Conv(conv5, num_filters*16, use_deform, 
+                 normal_conv_trainable=normal_conv_trainable)
     drop5 = Dropout(0.5)(conv5)
     
-    up6 = Conv(UpSampling2D(size = (2,2))(drop5), num_filters*8, use_deform, trainable=normal_conv_trainable)
+    up6 = Conv(UpSampling2D(size = (2,2))(drop5), num_filters*8, use_deform, 
+               normal_conv_trainable=normal_conv_trainable)
     merge6 = concatenate([drop4, up6], axis=3)
-    conv6 = Conv(merge6, num_filters*8, use_deform, trainable=normal_conv_trainable)
-    conv6 = Conv(conv6, num_filters*8, use_deform, trainable=normal_conv_trainable)
+    conv6 = Conv(merge6, num_filters*8, use_deform, 
+                 normal_conv_trainable=normal_conv_trainable)
+    conv6 = Conv(conv6, num_filters*8, use_deform, 
+                 normal_conv_trainable=normal_conv_trainable)
     
-    up7 = Conv(UpSampling2D(size = (2,2))(conv6), num_filters*4, use_deform, trainable=normal_conv_trainable)
+    up7 = Conv(UpSampling2D(size = (2,2))(conv6), num_filters*4, use_deform, 
+               normal_conv_trainable=normal_conv_trainable)
     merge7 = concatenate([conv3, up7], axis=3)
-    conv7 = Conv(merge7, num_filters*4, use_deform, trainable=normal_conv_trainable)
-    conv7 = Conv(conv7, num_filters*4, use_deform, trainable=normal_conv_trainable)
+    conv7 = Conv(merge7, num_filters*4, use_deform, 
+                 normal_conv_trainable=normal_conv_trainable)
+    conv7 = Conv(conv7, num_filters*4, use_deform, 
+                 normal_conv_trainable=normal_conv_trainable)
     
-    up8 = Conv(UpSampling2D(size = (2,2))(conv7), num_filters*2, use_deform, trainable=normal_conv_trainable)
+    up8 = Conv(UpSampling2D(size = (2,2))(conv7), num_filters*2, use_deform, 
+               normal_conv_trainable=normal_conv_trainable)
     merge8 = concatenate([conv2, up8], axis=3)
-    conv8 = Conv(merge8, num_filters*2, use_deform, trainable=normal_conv_trainable)
-    conv8 = Conv(conv8, num_filters*2, use_deform, trainable=normal_conv_trainable)
+    conv8 = Conv(merge8, num_filters*2, use_deform, 
+                 normal_conv_trainable=normal_conv_trainable)
+    conv8 = Conv(conv8, num_filters*2, use_deform, 
+                 normal_conv_trainable=normal_conv_trainable)
     
-    up9 = Conv(UpSampling2D(size = (2,2))(conv8), num_filters, use_deform, trainable=normal_conv_trainable)
+    up9 = Conv(UpSampling2D(size = (2,2))(conv8), num_filters, use_deform, 
+               normal_conv_trainable=normal_conv_trainable)
     merge9 = concatenate([conv1, up9], axis=3)
-    conv9 = Conv(merge9, num_filters, use_deform=False, trainable=normal_conv_trainable)
-    conv9 = Conv(conv9, num_filters, use_deform=False, trainable=normal_conv_trainable)
+    conv9 = Conv(merge9, num_filters, use_deform=False, 
+                 normal_conv_trainable=normal_conv_trainable)
+    conv9 = Conv(conv9, num_filters, use_deform=False, 
+                 normal_conv_trainable=normal_conv_trainable)
     
-    key_mask = Conv2D(1, 1, activation='sigmoid', name='key_mask', trainable=normal_conv_trainable)(conv9)
-    value_mask = Conv2D(1, 1, activation='sigmoid', name='value_mask', trainable=normal_conv_trainable)(conv9)
+    key_mask = Conv2D(1, 1, activation='sigmoid', name='key_mask', 
+                      normal_conv_trainable=normal_conv_trainable)(conv9)
+    value_mask = Conv2D(1, 1, activation='sigmoid', name='value_mask', 
+                        normal_conv_trainable=normal_conv_trainable)(conv9)
     
     model = Model(input=input, outputs=[key_mask, value_mask])
     
