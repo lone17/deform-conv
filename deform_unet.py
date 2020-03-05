@@ -39,13 +39,13 @@ def dice_coef(y_true, y_pred, smooth=1e-6):
 def dice_loss(y_true, y_pred):
     return -dice_coef(y_true, y_pred)
 
-def custom_loss(y_true, y_pred, class_weights=[0.2, 0.8]):
+def custom_loss(y_true, y_pred, class_weights=[0.1, 0.9]):
     dice = dice_loss(y_true, y_pred)
     if class_weights is not None:
         cross_entropy = create_weighted_binary_crossentropy(*class_weights)(y_true, y_pred)
     else:
         cross_entropy = keras.losses.binary_crossentropy(y_true, y_pred)
-    return dice + 0.5 * cross_entropy
+    return 4 * dice + 0.5 * cross_entropy
 
 def IoU_score(y_true, y_pred, smooth=1e-6):
     intersection = K.sum(K.abs(y_true * y_pred), axis=[1,2,3])
@@ -58,7 +58,7 @@ def Conv(input, num_filters, use_deform=False, activation='relu', padding='same'
     input = Conv2D(num_filters, (3, 3), activation=activation, padding=padding, 
                    kernel_initializer=kernel_initializer)(input)
     if use_deform:
-        input = ConvOffset2D(num_filters)(input)
+        input = ConvOffset2D(num_filters, channel_wise=False)(input)
     
     return input
 

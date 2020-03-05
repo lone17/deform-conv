@@ -10,24 +10,39 @@ from deform_conv.deform_conv import tf_batch_map_offsets
 class ConvOffset2D(Conv2D):
     """ConvOffset2D"""
 
-    def __init__(self, filters, init_normal_stddev=0.01, **kwargs):
+    def __init__(self, filters, channel_wise=True, init_normal_stddev=0.01, 
+                 **kwargs):
         """Init"""
 
-        self.filters = filters
-        super(ConvOffset2D, self).__init__(
-            self.filters * 2, (3, 3), padding='same', use_bias=False,
-            # TODO gradients are near zero if init is zeros
-            kernel_initializer='zeros',
-            # kernel_initializer=RandomNormal(0, init_normal_stddev),
-            **kwargs
-        )
-
+        self.channel_wise = channel_wise
+        
     def call(self, x):
         # TODO offsets probably have no nonlinearity?
         x_shape = tf.shape(x)
-        offsets = super(ConvOffset2D, self).call(x)
+        self.filters = x_shape[-1]
+        if self.channel_wise:
+            super(ConvOffset2D, self).__init__(
+                self.filters * 2, (3, 3), padding='same', use_bias=False,
+                # TODO gradients are near zero if init is zeros
+                kernel_initializer='zeros',
+                # kernel_initializer=RandomNormal(0, init_normal_stddev),
+                **kwargs
+            )
+        else:
+            super(ConvOffset2D, self).__init__(
+                2, (3, 3), padding='same', use_bias=False,
+                # TODO gradients are near zero if init is zeros
+                kernel_initializer='zeros',
+                # kernel_initializer=RandomNormal(0, init_normal_stddev),
+                **kwargs
+            )
 
-        offsets = self._to_bc_h_w_2(offsets, x_shape)
+        offsets = super(ConvOffset2D, self).call(x)
+        
+        if self.channel_wise:
+            offsets = self._to_bc_h_w_2(offsets, x_shape)
+        else:
+            offsets = tf.tile(offsets, [x_shape[-1], 1, 1, 1])
         x = self._to_bc_h_w(x, x_shape)
         x_offset = tf_batch_map_offsets(x, offsets)
         x_offset = self._to_b_h_w_c(x_offset, x_shape)
