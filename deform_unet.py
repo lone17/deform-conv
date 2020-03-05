@@ -115,15 +115,15 @@ def Unet(pretrained_weights=None, input_size=(None, None, 3), num_filters=32,
     
     model = Model(input=input, outputs=[key_mask, value_mask])
     
+    if pretrained_weights:
+        model.load_weights(pretrained_weights, by_name=True)
+    
     model.compile(optimizer=Adam(lr=1e-4), 
                   loss={'key_mask': custom_loss, 'value_mask': custom_loss}, 
                   metrics=['accuracy', IoU_score])
     
     model.summary()
-
-    if pretrained_weights:
-        model.load_weights(pretrained_weights)
-
+    
     return model
 
 # h = 64
