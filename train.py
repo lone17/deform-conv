@@ -6,14 +6,17 @@ from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 from deform_unet import Unet
 from load_data import data_generator
 
+model = None
+
 @click.command()
 @click.option('--pretrained_weights', '-w', default=None)
 @click.option('--checkpoint_dir', '-s', default='checkpoint/')
 @click.option('--deform/--no-deform', '-D/-nD', 'use_deform', default=True)
 @click.option('--train-norm-conv/--no-train-norm-conv', '-F/-nF', 'normal_conv_trainable', default=True)
 @click.option('--deform-channel/--no-deform-channel', '-C/-nC', 'channel_wise', default=False)
+@click.option('--epochs', '-e', default=100)
 def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
-          normal_conv_trainable):
+          normal_conv_trainable, epochs):
     
     checkpoint_dir = Path(checkpoint_dir)
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
@@ -22,6 +25,7 @@ def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
                                  save_weights_only=True, save_best_only=True, 
                                  verbose=1)
 
+    global model
     model = Unet(pretrained_weights, input_size=(None, None, 3), num_filters=4, 
                  use_deform=use_deform, channel_wise=channel_wise, 
                  normal_conv_trainable=normal_conv_trainable)
@@ -30,11 +34,9 @@ def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
                         steps_per_epoch=99, 
                         validation_data=data_generator('dataset/training_data', -1/3),
                         validation_steps=50,
-                        epochs=100)
+                        epochs=epochs)
 
     model.evaluate_generator(data_generator('dataset/testing_data'), steps=50)
     
-    return model
-
 if __name__ == '__main__':
-    model = train()
+    train()
