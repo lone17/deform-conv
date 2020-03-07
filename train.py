@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import click
@@ -18,9 +19,8 @@ model = None
 def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
           normal_conv_trainable, epochs):
     
-    checkpoint_dir = Path(checkpoint_dir)
-    checkpoint_dir.mkdir(parents=True, exist_ok=True)
-    ckpt_path = checkpoint_dir / 'ep{epoch:03d}_key-iou{val_key_mask_IoU_score:.4f}_value-iou{val_value_mask_IoU_score:.4f}.h5'
+    Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
+    ckpt_path = os.path.join(checkpoint_dir, 'ep{epoch:03d}_key-iou{val_key_mask_IoU_score:.4f}_value-iou{val_value_mask_IoU_score:.4f}.h5')
     checkpoint = ModelCheckpoint(ckpt_path, monitor='val_loss', 
                                  save_weights_only=True, save_best_only=True, 
                                  verbose=1)
@@ -31,12 +31,13 @@ def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
                  normal_conv_trainable=normal_conv_trainable)
 
     model.fit_generator(data_generator('dataset/training_data', 2/3, shuffle=True), 
-                        steps_per_epoch=99, 
+                        steps_per_epoch=1, 
                         validation_data=data_generator('dataset/training_data', -1/3),
-                        validation_steps=50,
-                        epochs=epochs)
+                        validation_steps=1,
+                        epochs=epochs,
+                        callbacks=[checkpoint])
 
-    model.evaluate_generator(data_generator('dataset/testing_data'), steps=50)
+    print(model.evaluate_generator(data_generator('dataset/testing_data'), steps=1))
     
 if __name__ == '__main__':
     train()
