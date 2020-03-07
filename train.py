@@ -3,7 +3,9 @@ from pathlib import Path
 
 import click
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler
+from keras.optimizers import *
 
+from metrics import *
 from deform_unet import Unet
 from load_data import data_generator
 
@@ -21,14 +23,20 @@ def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
     
     Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
     ckpt_path = os.path.join(checkpoint_dir, 'ep{epoch:03d}_key-iou{val_key_mask_IoU_score:.4f}_value-iou{val_value_mask_IoU_score:.4f}.h5')
-    checkpoint = ModelCheckpoint(ckpt_path, monitor='val_loss', 
-                                 save_weights_only=True, save_best_only=True, 
+    checkpoint = ModelCheckpoint(ckpt_path, 
+                                 monitor='val_loss', 
+                                 save_weights_only=True, 
+                                 save_best_only=True, 
                                  verbose=1)
 
     global model
-    model = Unet(pretrained_weights, input_size=(None, None, 3), num_filters=4, 
+    model = Unet(pretrained_weights, input_size=(None, None, 1), num_filters=4, 
                  use_deform=use_deform, channel_wise=channel_wise, 
                  normal_conv_trainable=normal_conv_trainable)
+    
+    model.compile(optimizer=Adam(lr=1e-4), 
+                  loss={'key_mask': custom_loss, 'value_mask': custom_loss}, 
+                  metrics=['accuracy', IoU_score])
 
     model.fit_generator(data_generator('dataset/training_data', 2/3, shuffle=True), 
                         steps_per_epoch=99, 

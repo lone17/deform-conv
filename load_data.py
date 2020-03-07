@@ -8,6 +8,17 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
+def preprocess_image(image):
+    if np.max(image) > 1:
+        image = image / 255
+    
+    img_h, img_w = image.shape[:2]
+    img_h = round_up_dividend(img_h, 16)
+    img_w = round_up_dividend(img_w, 16)
+    image = cv2.resize(image, (img_w, img_h))
+    
+    return image
+
 def data_generator(data_dir, portion=1.0, shuffle=False):
     image_map = {get_file_name(p): p for p in paths.list_images(Path(data_dir) / 'images')}
     label_map = {get_file_name(p): p for p in paths.list_files(Path(data_dir) / 'annotations', validExts=('.json'))}
@@ -34,26 +45,28 @@ def data_generator(data_dir, portion=1.0, shuffle=False):
             ratio_w = img_w / image.shape[1]
             image = cv2.resize(image, (img_w, img_h))
             
-            key_mask = np.zeros((img_h, img_w), dtype=np.uint8)
-            value_mask = np.zeros((img_h, img_w), dtype=np.uint8)
+            all_text_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
+            key_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
+            value_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
             for field in annotations:
                 x1, y1, x2, y2 = (np.array(field['box']) * [ratio_w, ratio_h, ratio_w, ratio_h]).astype(int)
+                all_text_mask[y1:y2, x1:x2] = 1.0
                 if field['label'] == 'question':
                     key_mask[y1:y2, x1:x2] = 1.0
                 elif field['label'] == 'answer':
                     value_mask[y1:y2, x1:x2] = 1.0
             
             # plt.subplot('131')
-            # plt.imshow(image)
+            # plt.imshow(all_text_mask[..., 0])
             # plt.subplot('132')
-            # plt.imshow(key_mask)
+            # plt.imshow(key_mask[..., 0])
             # plt.subplot('133')
-            # plt.imshow(value_mask)
+            # plt.imshow(value_mask[..., 0])
             # plt.show()
             
             # print(image.shape, masks.shape)
-            yield (image[None, ...], {'key_mask': key_mask[None, ..., None], 
-                                      'value_mask': value_mask[None, ..., None]})
+            yield (all_text_mask[None, ...], {'key_mask': key_mask[None, ...], 
+                                              'value_mask': value_mask[None, ...]})
 
 if __name__ == '__main__':
     data_generator('dataset//training_data')
