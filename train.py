@@ -31,13 +31,13 @@ def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
                  normal_conv_trainable=normal_conv_trainable)
 
     model.fit_generator(data_generator('dataset/training_data', 2/3, shuffle=True), 
-                        steps_per_epoch=1, 
+                        steps_per_epoch=99, 
                         validation_data=data_generator('dataset/training_data', -1/3),
-                        validation_steps=1,
+                        validation_steps=50,
                         epochs=epochs,
                         callbacks=[checkpoint])
 
-    print(model.evaluate_generator(data_generator('dataset/testing_data'), steps=1))
+    print(model.evaluate_generator(data_generator('dataset/testing_data'), steps=50))
     
 if __name__ == '__main__':
     train()
