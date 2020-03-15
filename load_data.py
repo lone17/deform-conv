@@ -48,6 +48,7 @@ def data_generator(data_dir, portion=1.0, shuffle=False):
             all_text_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
             key_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
             value_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
+            # other_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
             for field in annotations:
                 x1, y1, x2, y2 = (np.array(field['box']) * [ratio_w, ratio_h, ratio_w, ratio_h]).astype(int)
                 all_text_mask[y1:y2, x1:x2] = 1.0
@@ -55,6 +56,9 @@ def data_generator(data_dir, portion=1.0, shuffle=False):
                     key_mask[y1:y2, x1:x2] = 1.0
                 elif field['label'] == 'answer':
                     value_mask[y1:y2, x1:x2] = 1.0
+                # else:
+                #     other_mask[y1:y2, x1:x2] = 1.0
+            background = (1 - key_mask) * (1 - value_mask)
             
             # plt.subplot('131')
             # plt.imshow(all_text_mask[..., 0])
@@ -65,8 +69,8 @@ def data_generator(data_dir, portion=1.0, shuffle=False):
             # plt.show()
             
             # print(image.shape, masks.shape)
-            yield (all_text_mask[None, ...], {'key_mask': key_mask[None, ...], 
-                                              'value_mask': value_mask[None, ...]})
+            output_mask = np.dstack([key_mask, value_mask, background])
+            yield (all_text_mask[None, ...], output_mask[None, ...])
 
 if __name__ == '__main__':
     data_generator('dataset//training_data')

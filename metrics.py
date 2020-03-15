@@ -1,9 +1,11 @@
 import keras
+import numpy as np
+import tensorflow as tf
 from keras import backend as K
 
-def create_weighted_binary_crossentropy(zero_weight, one_weight):
+def weighted_binary_crossentropy(class_weights):
 
-    def weighted_binary_crossentropy(y_true, y_pred):
+    def loss(y_true, y_pred):
 
         # Original binary crossentropy (see losses.py):
         # K.mean(K.binary_crossentropy(y_true, y_pred), axis=-1)
@@ -12,13 +14,44 @@ def create_weighted_binary_crossentropy(zero_weight, one_weight):
         b_ce = K.binary_crossentropy(y_true, y_pred)
 
         # Apply the weights
-        weight_vector = y_true * one_weight + (1. - y_true) * zero_weight
+        weight_vector = y_true * class_weights[1] + (1. - y_true) * class_weights[0]
         weighted_b_ce = weight_vector * b_ce
 
         # Return the mean error
         return K.mean(weighted_b_ce)
 
-    return weighted_binary_crossentropy
+    return loss
+
+def weighted_categorical_crossentropy(weights):
+
+    def loss(y_true, y_pred):
+
+        # Original binary crossentropy (see losses.py):
+        # K.mean(K.binary_crossentropy(y_true, y_pred), axis=-1)
+
+        # Calculate the crossentropy
+        loss_map = K.categorical_crossentropy(y_true, y_pred)
+
+        y_shape = list(K.int_shape(y_pred))
+        if len(weights) != y_shape[-1]:
+            raise ValueError('''Number of weights ({}) does not match number of 
+                             classes ({})'''.format(len(weights), y_shape[-1]))
+        
+        # Compute the weight
+        weight_map = K.zeros_like(y_pred[..., 0])
+        print(y_pred.shape.as_list())
+        print(loss_map.shape.as_list())
+        print(weight_map.shape.as_list())
+        for i in range(len(weights)):
+            weight_map += y_true[..., i] * weights[i]
+        
+        # Apply the weights
+        loss_map = loss_map * weight_map
+
+        # Return the mean error
+        return K.mean(loss_map)
+
+    return loss
 
 def dice_coef(y_true, y_pred, smooth=1e-6):
     intersection = K.sum(y_true * y_pred, axis=[1,2,3])
@@ -31,13 +64,21 @@ def dice_loss(y_true, y_pred):
 def custom_loss(y_true, y_pred, class_weights=[0.1, 0.9]):
     dice = dice_loss(y_true, y_pred)
     if class_weights is not None:
-        cross_entropy = create_weighted_binary_crossentropy(*class_weights)(y_true, y_pred)
+        cross_entropy = weighted_binary_crossentropy(class_weights)(y_true, y_pred)
     else:
-        cross_entropy = keras.losses.binary_crossentropy(y_true, y_pred)
+        cross_entropy = K.binary_crossentropy(y_true, y_pred)
+    return 4 * dice + 0.5 * cross_entropy
+
+def custom_categorical_loss(y_true, y_pred, class_weights=[1, 1, 0.3]):
+    dice = dice_loss(y_true, y_pred)
+    if class_weights is not None:
+        cross_entropy = weighted_categorical_crossentropy(class_weights)(y_true, y_pred)
+    else:
+        cross_entropy = K.categorical_crossentropy(y_true, y_pred)
     return 4 * dice + 0.5 * cross_entropy
 
 def IoU_score(y_true, y_pred, smooth=1e-6):
     intersection = K.sum(K.abs(y_true * y_pred), axis=[1,2,3])
-    union = K.sum(y_true,[1,2,3])+K.sum(y_pred,[1,2,3])-intersection
+    union = K.sum(y_true, [1,2,3]) + K.sum(y_pred, [1,2,3]) - intersection
     iou = K.mean((intersection + smooth) / (union + smooth), axis=0)
     return iou

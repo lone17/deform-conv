@@ -22,7 +22,8 @@ def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
           normal_conv_trainable, epochs):
     
     Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
-    ckpt_path = os.path.join(checkpoint_dir, 'ep{epoch:03d}_key-iou{val_key_mask_IoU_score:.4f}_value-iou{val_value_mask_IoU_score:.4f}.h5')
+    # ckpt_path = os.path.join(checkpoint_dir, 'ep{epoch:03d}_key-iou{val_key_mask_IoU_score:.4f}_value-iou{val_value_mask_IoU_score:.4f}.h5')
+    ckpt_path = os.path.join(checkpoint_dir, 'ep{epoch:03d}_loss{val_loss:.4f}_iou{val_IoU_score:.4f}.h5')
     checkpoint = ModelCheckpoint(ckpt_path, 
                                  monitor='val_loss', 
                                  save_weights_only=True, 
@@ -35,7 +36,7 @@ def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
                  normal_conv_trainable=normal_conv_trainable)
     
     model.compile(optimizer=Adam(lr=1e-4), 
-                  loss={'key_mask': custom_loss, 'value_mask': custom_loss}, 
+                  loss=custom_categorical_loss, 
                   metrics=['accuracy', IoU_score])
 
     model.fit_generator(data_generator('dataset/training_data', 2/3, shuffle=True), 

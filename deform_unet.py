@@ -26,8 +26,6 @@ def Unet(pretrained_weights=None, input_size=(None, None, 3), num_filters=32,
     Conv = partial(Conv, normal_conv_trainable=normal_conv_trainable,
                    use_deform=use_deform, channel_wise=channel_wise)
     
-    inputs = Input(input_size)
-    
     input = Input(input_size)
     
     conv1 = Conv(input, num_filters, use_deform=False)
@@ -71,12 +69,15 @@ def Unet(pretrained_weights=None, input_size=(None, None, 3), num_filters=32,
     conv9 = Conv(merge9, num_filters, use_deform=False)
     conv9 = Conv(conv9, num_filters, use_deform=False)
     
-    key_mask = Conv2D(1, 1, activation='sigmoid', name='key_mask', 
-                      trainable=normal_conv_trainable)(conv9)
-    value_mask = Conv2D(1, 1, activation='sigmoid', name='value_mask', 
+    # key_mask = Conv2D(1, 1, activation='sigmoid', name='key_mask', 
+    #                   trainable=normal_conv_trainable)(conv9)
+    # value_mask = Conv2D(1, 1, activation='sigmoid', name='value_mask', 
+    #                     trainable=normal_conv_trainable)(conv9)
+    
+    output_mask = Conv2D(3, (1, 1), activation='softmax', name='output_mask', 
                         trainable=normal_conv_trainable)(conv9)
     
-    model = Model(input=input, outputs=[key_mask, value_mask])
+    model = Model(input=input, outputs=output_mask)
     
     if pretrained_weights:
         model.load_weights(pretrained_weights, by_name=True)
