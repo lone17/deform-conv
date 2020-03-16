@@ -31,8 +31,8 @@ def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
                                  verbose=1)
 
     global model
-    model = Unet(pretrained_weights, input_size=(None, None, 1), num_filters=4, 
-                 use_deform=use_deform, channel_wise=channel_wise, 
+    model = Unet(pretrained_weights, input_size=(None, None, 1), num_classes=4,
+                 num_filters=4, use_deform=use_deform, channel_wise=channel_wise, 
                  normal_conv_trainable=normal_conv_trainable)
     
     model.compile(optimizer=Adam(lr=1e-4), 

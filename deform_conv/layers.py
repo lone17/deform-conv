@@ -16,6 +16,7 @@ class ConvOffset2D(Conv2D):
 
         self.filters = filters
         self.channel_wise = channel_wise
+        self.init_normal_stddev = init_normal_stddev
         if self.channel_wise:
             super(ConvOffset2D, self).__init__(
                 self.filters * 2, (3, 3), padding='same', use_bias=False,
@@ -32,6 +33,13 @@ class ConvOffset2D(Conv2D):
                 # kernel_initializer=RandomNormal(0, init_normal_stddev),
                 **kwargs
             )
+
+    def get_config(self):
+        config = {}
+        config.update({'filters': self.filters,
+                       'channel_wise': self.channel_wise,
+                       'init_normal_stddev': self.init_normal_stddev})
+        return config
 
     def call(self, x):
         # TODO offsets probably have no nonlinearity?

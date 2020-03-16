@@ -54,8 +54,11 @@ def weighted_categorical_crossentropy(weights):
     return loss
 
 def dice_coef(y_true, y_pred, smooth=1e-6):
+    # print(K.int_shape(y_true), y_true.shape.as_list())
     intersection = K.sum(y_true * y_pred, axis=[1,2,3])
     union = K.sum(y_true, axis=[1,2,3]) + K.sum(y_pred, axis=[1,2,3])
+    # print(K.int_shape(intersection), intersection.shape.as_list())
+    # print(K.int_shape(union), union.shape.as_list())
     return K.mean( (2. * intersection + smooth) / (union + smooth), axis=0)
 
 def dice_loss(y_true, y_pred):
@@ -69,7 +72,8 @@ def custom_loss(y_true, y_pred, class_weights=[0.1, 0.9]):
         cross_entropy = K.binary_crossentropy(y_true, y_pred)
     return 4 * dice + 0.5 * cross_entropy
 
-def custom_categorical_loss(y_true, y_pred, class_weights=[1, 1, 0.3]):
+def custom_categorical_loss(y_true, y_pred, class_weights=[1, 1, 1, 0.3]):
+    class_weights = np.array(class_weights) / np.sum(class_weights)
     dice = dice_loss(y_true, y_pred)
     if class_weights is not None:
         cross_entropy = weighted_categorical_crossentropy(class_weights)(y_true, y_pred)
@@ -82,3 +86,5 @@ def IoU_score(y_true, y_pred, smooth=1e-6):
     union = K.sum(y_true, [1,2,3]) + K.sum(y_pred, [1,2,3]) - intersection
     iou = K.mean((intersection + smooth) / (union + smooth), axis=0)
     return iou
+
+custom_objects = [IoU_score, custom_loss, custom_categorical_loss]

@@ -19,8 +19,9 @@ def Conv(input, num_filters, use_deform=False, activation='relu', padding='same'
     
     return input
 
-def Unet(pretrained_weights=None, input_size=(None, None, 3), num_filters=32, 
-         use_deform=True, channel_wise=False, normal_conv_trainable=True):
+def Unet(pretrained_weights=None, input_size=(None, None, 3), num_classes=3,
+         num_filters=32, use_deform=True, channel_wise=False, 
+         normal_conv_trainable=True):
     
     global Conv
     Conv = partial(Conv, normal_conv_trainable=normal_conv_trainable,
@@ -74,8 +75,8 @@ def Unet(pretrained_weights=None, input_size=(None, None, 3), num_filters=32,
     # value_mask = Conv2D(1, 1, activation='sigmoid', name='value_mask', 
     #                     trainable=normal_conv_trainable)(conv9)
     
-    output_mask = Conv2D(3, (1, 1), activation='softmax', name='output_mask', 
-                        trainable=normal_conv_trainable)(conv9)
+    output_mask = Conv2D(num_classes, (1, 1), activation='softmax', name='output_mask', 
+                         trainable=normal_conv_trainable)(conv9)
     
     model = Model(input=input, outputs=output_mask)
     
