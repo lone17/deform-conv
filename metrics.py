@@ -62,7 +62,7 @@ def dice_coef(y_true, y_pred, smooth=1e-6):
     # print(K.int_shape(intersection), intersection.shape.as_list())
     # print(K.int_shape(union), union.shape.as_list())
     # print('-' * 50)
-    loss = K.mean( (2. * intersection + smooth) / (union + smooth), axis=-1)
+    loss = K.mean((2. * intersection + smooth) / (union + smooth), axis=-1)
     loss = K.mean(loss)
     
     return loss
@@ -78,7 +78,7 @@ def custom_loss(y_true, y_pred, class_weights=[0.1, 0.9]):
         cross_entropy = K.binary_crossentropy(y_true, y_pred)
     return 4 * dice + 0.5 * cross_entropy
 
-def custom_categorical_loss(y_true, y_pred, class_weights=[1, 1, 1, 0.3]):
+def custom_categorical_loss(y_true, y_pred, class_weights=[1, 1, 0.3]):
     class_weights = np.array(class_weights) / np.sum(class_weights)
     dice = dice_loss(y_true, y_pred)
     if class_weights is not None:

@@ -3,8 +3,10 @@ from functools import partial
 import numpy as np
 from keras.models import *
 from keras.layers import *
+from keras.optimizers import *
 
 from utils import *
+from metrics import *
 from deform_conv.layers import ConvOffset2D
 
 
@@ -80,11 +82,14 @@ def Unet(pretrained_weights=None, input_size=(None, None, 3), num_classes=3,
     
     model = Model(input=input, outputs=output_mask)
     
+    model.compile(optimizer=Adam(lr=1e-4), 
+                  loss=custom_categorical_loss, 
+                  metrics=['accuracy', IoU_score])
+    
     if pretrained_weights:
         model.load_weights(pretrained_weights, by_name=True)
-
     
-    model.summary()
+    # model.summary()
     
     return model
 
