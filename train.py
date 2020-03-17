@@ -1,6 +1,11 @@
 import os
 from pathlib import Path
 
+import tensorflow as tf
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+session = tf.Session(config=config)
+
 import click
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 from keras.optimizers import *
