@@ -37,11 +37,11 @@ def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
     ckpt_path = os.path.join(checkpoint_dir, 'ep{epoch:03d}_loss{val_loss:.4f}_iou{val_IoU_score:.4f}.h5')
     cp = ModelCheckpoint(ckpt_path, monitor='val_loss',  save_weights_only=True, 
                          save_best_only=True, verbose=1)
-    es = EarlyStopping(monitor='val_loss', min_delta=0, restore_best_weights=True)
 
-    model_args = dict(input_size=(None, None, 1), num_classes=3, num_filters=4, 
+    model_args = dict(input_size=(None, None, 1), num_classes=4, num_filters=4, 
                       use_deform=use_deform, channel_wise=channel_wise, 
-                      normal_conv_trainable=normal_conv_trainable)
+                      normal_conv_trainable=normal_conv_trainable,
+                      class_weights=[1, 1, 1, 0.3])
 
     # global model
     model = Unet(pretrained_weights, **model_args)
@@ -52,25 +52,24 @@ def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
                         validation_data=data_generator('dataset/training_data', -1/3),
                         validation_steps=50,
                         epochs=epochs,
-                        callbacks=[cp, es])
+                        callbacks=[cp])
 
     val_result = model.evaluate_generator(data_generator('dataset/training_data', -1/3), steps=50)
     test_result = model.evaluate_generator(data_generator('dataset/testing_data'), steps=50)
     print(val_result)
     print(test_result)
 
-    save_path = '_'.join(['mask2mask', str(model_args['num_classes']) + 'C',
-                          'D' if use_deform else ('D_C' if channel_wise else 'D_nC'),
-                          'val{:.4f}'.format(val_result[-1]),
-                          'test{:.4f}'.format(test_result[-1])]) + '.h5'
+    # save_path = '_'.join(['mask2mask' + str(model_args['num_classes']) + 'C',
+    #                       'nD' if not use_deform else ('D_C' if channel_wise else 'D_nC'),
+    #                       'val{:.4f}'.format(val_result[-1]),
+    #                       'test{:.4f}'.format(test_result[-1])]) + '.h5'
     model.save(save_path)
     model.load_weights(save_path)
     print(model.evaluate_generator(data_generator('dataset/training_data', -1/3), steps=50))
     print(model.evaluate_generator(data_generator('dataset/testing_data'), steps=50))
 
     del model
-    model = Unet(None, **model_args)
-    model.load_weights(save_path)
+    model = Unet(save_path, **model_args)
     print(model.evaluate_generator(data_generator('dataset/training_data', -1/3), steps=50))
     print(model.evaluate_generator(data_generator('dataset/testing_data'), steps=50))
     

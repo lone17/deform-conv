@@ -30,7 +30,7 @@ def image_to_masks(image, annotations):
     all_text_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
     key_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
     value_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
-    # other_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
+    other_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
     # annotations = sorted(annotations, key=lambda x: x['id'])
     for field in annotations:
         x1, y1, x2, y2 = (np.array(field['box']) * [ratio_w, ratio_h, ratio_w, ratio_h]).astype(int)
@@ -39,9 +39,9 @@ def image_to_masks(image, annotations):
             key_mask[y1:y2, x1:x2] = 1.0
         elif field['label'] == 'answer':
             value_mask[y1:y2, x1:x2] = 1.0
-        # else:
-        #     other_mask[y1:y2, x1:x2] = 1.0
-    background = (1 - key_mask) * (1 - value_mask)
+        else:
+            other_mask[y1:y2, x1:x2] = 1.0
+    background = (1 - key_mask) * (1 - value_mask) * (1 - other_mask)
     
     # plt.subplot('231')
     # plt.imshow(image)
@@ -58,7 +58,7 @@ def image_to_masks(image, annotations):
     # plt.show()
     
     
-    return all_text_mask, key_mask, value_mask, background
+    return all_text_mask, key_mask, value_mask, other_mask, background
 
 def data_generator(data_dir, portion=1.0, shuffle=False):
     image_map = {get_file_name(p): p for p in paths.list_images(Path(data_dir) / 'images')}

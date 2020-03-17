@@ -39,9 +39,6 @@ def weighted_categorical_crossentropy(weights):
         
         # Compute the weight
         weight_map = K.zeros_like(y_pred[..., 0])
-        print(y_pred.shape.as_list())
-        print(loss_map.shape.as_list())
-        print(weight_map.shape.as_list())
         for i in range(len(weights)):
             weight_map += y_true[..., i] * weights[i]
         
@@ -78,7 +75,7 @@ def custom_loss(y_true, y_pred, class_weights=[0.1, 0.9]):
         cross_entropy = K.binary_crossentropy(y_true, y_pred)
     return 4 * dice + 0.5 * cross_entropy
 
-def custom_categorical_loss(y_true, y_pred, class_weights=[1, 1, 0.3]):
+def custom_categorical_loss(y_true, y_pred, class_weights=[1, 1, 1, 0.3]):
     class_weights = np.array(class_weights) / np.sum(class_weights)
     dice = dice_loss(y_true, y_pred)
     if class_weights is not None:
