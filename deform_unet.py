@@ -87,11 +87,15 @@ def Unet(pretrained_weights=None, input_size=(None, None, 3), num_classes=3,
     IoU_score = partial(IoU_score, ignore_last_channel=ignore_background)
     IoU_score.__name__ = 'IoU_score'
     
+    global custom_categorical_loss
+    custom_categorical_loss = partial(custom_categorical_loss, 
+                                      class_weights=class_weights,
+                                      loss_weights=loss_weights,
+                                      ignore_last_channel=ignore_background)
+    custom_categorical_loss.__name__ = 'custom_categorical_loss'
+    
     model.compile(optimizer=Adam(lr=1e-4), 
-                  loss=partial(custom_categorical_loss, 
-                               class_weights=class_weights,
-                               loss_weights=loss_weights,
-                               ignore_last_channel=ignore_background), 
+                  loss=custom, 
                   metrics=['accuracy', IoU_score])
     
     if pretrained_weights:
