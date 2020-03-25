@@ -95,7 +95,7 @@ def Unet(pretrained_weights=None, input_size=(None, None, 3), num_classes=3,
     custom_categorical_loss.__name__ = 'custom_categorical_loss'
     
     model.compile(optimizer=Adam(lr=1e-4), 
-                  loss=custom, 
+                  loss=custom_categorical_loss, 
                   metrics=['accuracy', IoU_score])
     
     if pretrained_weights:
