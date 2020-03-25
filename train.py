@@ -19,17 +19,19 @@ model = None
 @click.option('--pretrained_weights', '-w', default=None)
 @click.option('--checkpoint_dir', '-s', default='checkpoint/')
 @click.option('--deform/--no-deform', '-D/-nD', 'use_deform', default=True)
-@click.option('--train-norm-conv/--no-train-norm-conv', '-F/-nF', 'normal_conv_trainable', default=True)
-@click.option('--deform-channel/--no-deform-channel', '-C/-nC', 'channel_wise', default=False)
+@click.option('--normal-conv-trainable', '-N/-nN', default=True)
+@click.option('--channel-wise-deform', '-C/-nC', default=False)
+@click.option('--ignore-background', '-I/-nI', default=False)
 @click.option('--epochs', '-e', default=100)
-def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
-          normal_conv_trainable, epochs):
+def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise_deform,
+          normal_conv_trainable, ignore_background, epochs):
     
 # pretrained_weights=None
 # checkpoint_dir='checkpoint/'
 # use_deform=False
 # normal_conv_trainable=True
-# channel_wise=False
+# channel_wise_deform=False
+# ignore_background=False
 # epochs=1
     
     Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
@@ -39,18 +41,19 @@ def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
                          save_best_only=True, verbose=1)
 
     model_args = dict(input_size=(None, None, 1), num_classes=4, num_filters=4, 
-                      use_deform=use_deform, channel_wise=channel_wise, 
+                      use_deform=use_deform, channel_wise=channel_wise_deform, 
                       normal_conv_trainable=normal_conv_trainable,
-                      class_weights=[1, 1, 1, 0.3])
+                      class_weights=[1, 1, 1, 0.3], loss_weights=[4.0, 0.5],
+                      ignore_background=ignore_background)
 
     # global model
     model = Unet(pretrained_weights, **model_args)
     model.summary()
 
     model.fit_generator(data_generator('dataset/training_data', 2/3, shuffle=True), 
-                        steps_per_epoch=99, 
+                        steps_per_epoch=1, 
                         validation_data=data_generator('dataset/training_data', -1/3),
-                        validation_steps=50,
+                        validation_steps=1,
                         epochs=epochs,
                         callbacks=[cp])
 
@@ -59,19 +62,20 @@ def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise,
     print(val_result)
     print(test_result)
 
-    # save_path = '_'.join(['mask2mask' + str(model_args['num_classes']) + 'C',
-    #                       'nD' if not use_deform else ('D_C' if channel_wise else 'D_nC'),
-    #                       'val{:.4f}'.format(val_result[-1]),
-    #                       'test{:.4f}'.format(test_result[-1])]) + '.h5'
+    save_path = '_'.join(['mask2mask' + str(model_args['num_classes']) + 'C',
+                          'nD' if not use_deform else ('D_C' if channel_wise else 'D_nC'),
+                          'I' if ignore_background else 'nI',
+                          'val{:.4f}'.format(val_result[-1]),
+                          'test{:.4f}'.format(test_result[-1])]) + '.h5'
     model.save(save_path)
-    model.load_weights(save_path)
-    print(model.evaluate_generator(data_generator('dataset/training_data', -1/3), steps=50))
-    print(model.evaluate_generator(data_generator('dataset/testing_data'), steps=50))
-
-    del model
-    model = Unet(save_path, **model_args)
-    print(model.evaluate_generator(data_generator('dataset/training_data', -1/3), steps=50))
-    print(model.evaluate_generator(data_generator('dataset/testing_data'), steps=50))
+    # model.load_weights(save_path)
+    # print(model.evaluate_generator(data_generator('dataset/training_data', -1/3), steps=50))
+    # print(model.evaluate_generator(data_generator('dataset/testing_data'), steps=50))
+    # 
+    # del model
+    # model = Unet(save_path, **model_args)
+    # print(model.evaluate_generator(data_generator('dataset/training_data', -1/3), steps=50))
+    # print(model.evaluate_generator(data_generator('dataset/testing_data'), steps=50))
     
 if __name__ == '__main__':
     train()

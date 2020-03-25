@@ -23,7 +23,8 @@ def Conv(input, num_filters, use_deform=False, activation='relu', padding='same'
 
 def Unet(pretrained_weights=None, input_size=(None, None, 3), num_classes=3,
          num_filters=32, use_deform=True, channel_wise=False, 
-         normal_conv_trainable=True, class_weights=None):
+         normal_conv_trainable=True, class_weights=None, loss_weights=[1.0, 1.0],
+         ignore_background=False):
     
     global Conv
     Conv = partial(Conv, normal_conv_trainable=normal_conv_trainable,
@@ -82,8 +83,15 @@ def Unet(pretrained_weights=None, input_size=(None, None, 3), num_classes=3,
     
     model = Model(input=input, outputs=output_mask)
     
+    global IoU_score
+    IoU_score = partial(IoU_score, ignore_last_channel=ignore_background)
+    IoU_score.__name__ = 'IoU_score'
+    
     model.compile(optimizer=Adam(lr=1e-4), 
-                  loss=partial(custom_categorical_loss, class_weights=class_weights), 
+                  loss=partial(custom_categorical_loss, 
+                               class_weights=class_weights,
+                               loss_weights=loss_weights,
+                               ignore_last_channel=ignore_background), 
                   metrics=['accuracy', IoU_score])
     
     if pretrained_weights:
