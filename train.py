@@ -62,7 +62,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     print(test_result)
 
     save_path = '_'.join(['mask2mask' + str(model_args['num_classes']) + 'C',
-                          'nD' if not use_deform else ('D_C' if channel_wise else 'D_nC'),
+                          'nD' if not use_deform else ('D_C' if channel_wise_deform else 'D_nC'),
                           'I' if ignore_background else 'nI',
                           'val{:.4f}'.format(val_result[-1]),
                           'test{:.4f}'.format(test_result[-1])]) + '.h5'
