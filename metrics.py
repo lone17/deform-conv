@@ -55,7 +55,7 @@ def weighted_categorical_crossentropy(y_true, y_pred, class_weights=None):
     return K.mean(loss_map)
 
 
-def dice_loss(y_true, y_pred, smooth=1e-6, ignore_last_channel=False):
+def dice_loss(y_true, y_pred, ignore_last_channel, smooth=1e-6):
     
     if ignore_last_channel:
         y_true = y_true[..., :-1]
@@ -80,7 +80,7 @@ def custom_loss(y_true, y_pred, class_weights=[0.1, 0.9],
     
     class_weights = np.array(class_weights) / np.sum(class_weights)
     
-    dice = dice_loss(y_true, y_pred, ignore_last_channel)
+    dice = dice_loss(y_true, y_pred, ignore_last_channel=ignore_last_channel)
     cross_entropy = weighted_binary_crossentropy(y_true, y_pred, class_weights)
     
     return loss_weights[0] * dice + loss_weights[1] * cross_entropy
@@ -90,7 +90,7 @@ def custom_categorical_loss(y_true, y_pred, class_weights=[1, 1, 1, 0.3],
                             loss_weights=[4, 0.5], ignore_last_channel=False):
     
     class_weights = np.array(class_weights) / np.sum(class_weights)
-    dice = dice_loss(y_true, y_pred, ignore_last_channel)
+    dice = dice_loss(y_true, y_pred, ignore_last_channel=ignore_last_channel)
     
     cross_entropy = weighted_categorical_crossentropy(y_true, y_pred, class_weights)
     

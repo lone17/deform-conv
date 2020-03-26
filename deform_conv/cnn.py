@@ -36,7 +36,7 @@ def get_cnn():
     return inputs, outputs
 
 
-def get_deform_cnn(trainable):
+def get_deform_cnn(trainable, channel_wise=True):
     inputs = l = Input((None, None, 1), name='input')
 
     # conv11
@@ -45,20 +45,20 @@ def get_deform_cnn(trainable):
     l = BatchNormalization(name='conv11_bn')(l)
 
     # conv12
-    l_offset = ConvOffset2D(32, name='conv12_offset')(l)
+    l_offset = ConvOffset2D(32, channel_wise=channel_wise, name='conv12_offset')(l)
     l = Conv2D(64, (3, 3), activation='relu', padding='same', name='conv12', 
                trainable=trainable)(l_offset)
     l = MaxPooling2D((2, 2))(l)
     l = BatchNormalization(name='conv12_bn')(l)
 
     # conv21
-    l_offset = ConvOffset2D(64, name='conv21_offset')(l)
+    l_offset = ConvOffset2D(64, channel_wise=channel_wise, name='conv21_offset')(l)
     l = Conv2D(128, (3, 3), activation='relu', padding='same', name='conv21', 
                trainable=trainable)(l_offset)
     l = BatchNormalization(name='conv21_bn')(l)
 
     # conv22
-    l_offset = ConvOffset2D(128, name='conv22_offset')(l)
+    l_offset = ConvOffset2D(128, channel_wise=channel_wise, name='conv22_offset')(l)
     l = Conv2D(128, (3, 3), activation='relu', padding='same', name='conv22', 
                trainable=trainable)(l_offset)
     l = MaxPooling2D((2, 2))(l)

@@ -17,15 +17,14 @@ model = None
 
 @click.command()
 @click.option('--pretrained_weights', '-w', default=None)
+@click.option('--epochs', '-e', default=100)
 @click.option('--checkpoint_dir', '-s', default='checkpoint/')
 @click.option('--deform/--no-deform', '-D/-nD', 'use_deform', default=True)
-@click.option('--normal-conv-trainable', '-N/-nN', default=True)
 @click.option('--channel-wise-deform', '-C/-nC', default=False)
+@click.option('--normal-conv-trainable', '-N/-nN', default=True)
 @click.option('--ignore-background', '-I/-nI', default=False)
-@click.option('--epochs', '-e', default=100)
-def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise_deform,
-          normal_conv_trainable, ignore_background, epochs):
-    
+def train(pretrained_weights, epochs, checkpoint_dir, use_deform, 
+          channel_wise_deform, normal_conv_trainable, ignore_background):
 # pretrained_weights=None
 # checkpoint_dir='checkpoint/'
 # use_deform=False
@@ -51,9 +50,9 @@ def train(pretrained_weights, checkpoint_dir, use_deform, channel_wise_deform,
     model.summary()
 
     model.fit_generator(data_generator('dataset/training_data', 2/3, shuffle=True), 
-                        steps_per_epoch=1, 
+                        steps_per_epoch=50, 
                         validation_data=data_generator('dataset/training_data', -1/3),
-                        validation_steps=1,
+                        validation_steps=50,
                         epochs=epochs,
                         callbacks=[cp])
 

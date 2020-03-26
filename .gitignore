@@ -95,3 +95,6 @@ target/
 logs/
 notebooks/
 tags
+dataset/
+*.h5
+*.zip
