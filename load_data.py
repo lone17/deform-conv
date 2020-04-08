@@ -26,6 +26,8 @@ def image_to_masks(image, annotations):
     ratio_h = img_h / image.shape[0]
     ratio_w = img_w / image.shape[1]
     image = cv2.resize(image, (img_w, img_h))
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    image = 1.0 - image / 255
     
     all_text_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
     key_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
@@ -59,15 +61,19 @@ def image_to_masks(image, annotations):
     # plt.show()
     
     
-    return (all_text_mask, 
+    return (image,
+            all_text_mask, 
             key_mask, 
             value_mask, 
             other_mask, 
             background)
 
 def data_generator(data_dir, portion=1.0, shuffle=False):
-    image_map = {get_file_name(p): p for p in paths.list_images(Path(data_dir) / 'images')}
-    label_map = {get_file_name(p): p for p in paths.list_files(Path(data_dir) / 'annotations', validExts=('.json'))}
+    image_map = {get_file_name(p): p 
+                 for p in paths.list_images(Path(data_dir) / 'images')}
+    label_map = {get_file_name(p): p 
+                 for p in paths.list_files(Path(data_dir) / 'annotations', 
+                                           validExts=('.json'))}
     
     chosen_keys = sorted(list(image_map.keys()))
     amount = round(len(chosen_keys) * portion)
@@ -80,18 +86,19 @@ def data_generator(data_dir, portion=1.0, shuffle=False):
         for k in chosen_keys:
             # image = cv2.imread(image_map[k], cv2.IMREAD_GRAYSCALE) / 255
             # image = 1.0 - image
-            image = cv2.imread(image_map[k], cv2.IMREAD_COLOR) / 255
+            image = cv2.imread(image_map[k], cv2.IMREAD_COLOR)
             annotations = read_json(label_map[k])['form']
             
-            all_text_mask, *output_masks = image_to_masks(image, annotations)
+            resized_grey_image, all_text_mask, *output_masks = image_to_masks(image, annotations)
             
+            input = np.dstack([resized_grey_image, all_text_mask])
             output_masks = np.dstack(output_masks)
             # plt.subplot('121')
             # plt.imshow(output_masks[..., :-1] * 255)
             # plt.subplot('122')
             # plt.imshow(output_masks[..., -1])
             # plt.show()
-            yield (all_text_mask[None, ...], output_masks[None, ...])
+            yield (input[None, ...], output_masks[None, ...])
 
 if __name__ == '__main__':
     data_generator('dataset//training_data')
