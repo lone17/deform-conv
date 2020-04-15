@@ -8,21 +8,21 @@ import matplotlib.pyplot as plt
 
 from utils import *
 
-def preprocess_image(image):
+def preprocess_image(image, down_scale=16):
     if np.max(image) > 1:
         image = image / 255
     
     img_h, img_w = image.shape[:2]
-    img_h = round_up_dividend(img_h, 16)
-    img_w = round_up_dividend(img_w, 16)
+    img_h = round_up_dividend(img_h, down_scale)
+    img_w = round_up_dividend(img_w, down_scale)
     image = cv2.resize(image, (img_w, img_h))
     
     return image
 
-def image_to_masks(image, annotations):
+def image_to_masks(image, annotations, down_scale):
     img_h, img_w = image.shape[:2]
-    img_h = round_up_dividend(img_h, 16)
-    img_w = round_up_dividend(img_w, 16)
+    img_h = round_up_dividend(img_h, down_scale)
+    img_w = round_up_dividend(img_w, down_scale)
     ratio_h = img_h / image.shape[0]
     ratio_w = img_w / image.shape[1]
     image = cv2.resize(image, (img_w, img_h))
@@ -68,7 +68,7 @@ def image_to_masks(image, annotations):
             other_mask, 
             background)
 
-def data_generator(data_dir, portion=1.0, shuffle=False):
+def data_generator(data_dir, portion=1.0, down_scale=16, shuffle=False):
     image_map = {get_file_name(p): p 
                  for p in paths.list_images(Path(data_dir) / 'images')}
     label_map = {get_file_name(p): p 
@@ -89,7 +89,8 @@ def data_generator(data_dir, portion=1.0, shuffle=False):
             image = cv2.imread(image_map[k], cv2.IMREAD_COLOR)
             annotations = read_json(label_map[k])['form']
             
-            resized_grey_image, all_text_mask, *output_masks = image_to_masks(image, annotations)
+            resized_grey_image, all_text_mask, *output_masks = \
+                image_to_masks(image, annotations, down_scale)
             
             input = np.dstack([resized_grey_image, all_text_mask])
             output_masks = np.dstack(output_masks)
@@ -101,4 +102,29 @@ def data_generator(data_dir, portion=1.0, shuffle=False):
             yield (input[None, ...], output_masks[None, ...])
 
 if __name__ == '__main__':
-    data_generator('dataset//training_data')
+    # data_generator('dataset//training_data')
+    sizes = []
+    max_w, max_h = 0, 0
+    for p in paths.list_images('dataset//training_data//images'):
+        img = cv2.imread(p)
+        h, w = img.shape[:2]
+        sizes.append((w, h))
+        if h > max_h:
+            max_h = h
+        if w > max_w:
+            max_w = w
+    
+    img = np.zeros((max_h, max_w))
+    for w, h in sizes:
+        img[:h, :w] += 1
+    
+    img /= np.max(img)
+    
+    plt.imshow(img)
+    plt.show()
+    
+    plt.subplot('121')
+    plt.hist([x[0] for x in sizes])
+    plt.subplot('122')
+    plt.hist([x[1] for x in sizes])
+    plt.show()

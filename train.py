@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from functools import partial
 
 import tensorflow as tf
 config = tf.ConfigProto()
@@ -12,6 +13,8 @@ from keras.callbacks import ModelCheckpoint, LearningRateScheduler, EarlyStoppin
 from metrics import *
 from deform_unet import Unet
 from load_data import data_generator
+
+data_generator = partial(data_generator, down_scale=32)
 
 model = None
 
