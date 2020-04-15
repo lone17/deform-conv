@@ -13,6 +13,8 @@ def weighted_binary_crossentropy(y_true, y_pred, class_weights=None):
     
     if class_weights is None:
         return b_ce
+    else:
+        class_weights = np.array(class_weights) / np.sum(class_weights)
     
     y_shape = list(K.int_shape(y_pred))
     if len(class_weights) != y_shape[-1]:
@@ -37,6 +39,8 @@ def weighted_categorical_crossentropy(y_true, y_pred, class_weights=None):
     
     if class_weights is None:
         return loss_map
+    else:
+        class_weights = np.array(class_weights) / np.sum(class_weights)
 
     y_shape = list(K.int_shape(y_pred))
     if len(class_weights) != y_shape[-1]:
@@ -78,8 +82,6 @@ def dice_loss(y_true, y_pred, ignore_last_channel, smooth=1e-6):
 def custom_loss(y_true, y_pred, class_weights=[0.1, 0.9], 
                 loss_weights=[4, 0.5], ignore_last_channel=False):
     
-    class_weights = np.array(class_weights) / np.sum(class_weights)
-    
     dice = dice_loss(y_true, y_pred, ignore_last_channel=ignore_last_channel)
     cross_entropy = weighted_binary_crossentropy(y_true, y_pred, class_weights)
     
@@ -89,7 +91,6 @@ def custom_loss(y_true, y_pred, class_weights=[0.1, 0.9],
 def custom_categorical_loss(y_true, y_pred, class_weights=[1, 1, 1, 0.3], 
                             loss_weights=[4, 0.5], ignore_last_channel=False):
     
-    class_weights = np.array(class_weights) / np.sum(class_weights)
     dice = dice_loss(y_true, y_pred, ignore_last_channel=ignore_last_channel)
     
     cross_entropy = weighted_categorical_crossentropy(y_true, y_pred, class_weights)
