@@ -4,6 +4,7 @@ import numpy as np
 from keras.models import *
 from keras.layers import *
 from keras.optimizers import *
+from keras import regularizers
 
 from utils import *
 from metrics import *
@@ -15,6 +16,7 @@ def Conv(input, num_filters, use_deform=False, activation='relu', padding='same'
          channel_wise=False):
     input = Conv2D(num_filters, (3, 3), activation=None, padding=padding, 
                    kernel_initializer=kernel_initializer, 
+                   kernel_regularizer=regularizers.l2(0.01),
                    trainable=normal_conv_trainable)(input)
     if use_deform:
         input = ConvOffset2D(num_filters, channel_wise=channel_wise)(input)
