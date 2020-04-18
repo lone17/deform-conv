@@ -57,7 +57,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     model.summary()
 
     model.fit_generator(data_generator('dataset/training_data', 2/3, shuffle=True), 
-                        steps_per_epoch=50, 
+                        steps_per_epoch=99, 
                         validation_data=data_generator('dataset/training_data', -1/3),
                         validation_steps=50,
                         epochs=epochs,
