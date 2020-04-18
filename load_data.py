@@ -1,5 +1,6 @@
 import random
 from pathlib import Path
+from functools import lru_cache
 
 import cv2
 import numpy as np
@@ -68,6 +69,10 @@ def image_to_masks(image, annotations, down_scale):
             other_mask, 
             background)
 
+@lru_cache(None)
+def read_img(img_path):
+    return cv2.imread(img_path, cv2.IMREAD_COLOR)
+
 def data_generator(data_dir, portion=1.0, down_scale=16, shuffle=False):
     image_map = {get_file_name(p): p 
                  for p in paths.list_images(Path(data_dir) / 'images')}
@@ -86,7 +91,7 @@ def data_generator(data_dir, portion=1.0, down_scale=16, shuffle=False):
         for k in chosen_keys:
             # image = cv2.imread(image_map[k], cv2.IMREAD_GRAYSCALE) / 255
             # image = 1.0 - image
-            image = cv2.imread(image_map[k], cv2.IMREAD_COLOR)
+            image = read_img(image_map[k])
             annotations = read_json(label_map[k])['form']
             
             resized_grey_image, all_text_mask, *output_masks = \
