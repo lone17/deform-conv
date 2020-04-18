@@ -38,7 +38,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     
     Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
     # ckpt_path = os.path.join(checkpoint_dir, 'ep{epoch:03d}_key-iou{val_key_mask_IoU_score:.4f}_value-iou{val_value_mask_IoU_score:.4f}.h5')
-    ckpt_path = os.path.join(checkpoint_dir, '1a_ep{epoch:03d}_loss{val_loss:.4f}_iou{val_IoU_score:.4f}.h5')
+    ckpt_path = os.path.join(checkpoint_dir, 'ep{epoch:03d}_loss{val_loss:.4f}_iou{val_IoU_score:.4f}.h5')
     callbacks = [
         ModelCheckpoint(ckpt_path, monitor='val_loss',  save_weights_only=False, 
                         save_best_only=True, verbose=1),
@@ -68,7 +68,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     print(val_result)
     print(test_result)
 
-    save_path = '_'.join(['1a_mask2mask' + str(model_args['num_classes']) + 'C',
+    save_path = '_'.join(['1b_mask2mask' + str(model_args['num_classes']) + 'C',
                           'nD' if not use_deform else ('D_C' if channel_wise_deform else 'D_nC'),
                           'I' if ignore_background else 'nI',
                           'val{:.4f}'.format(val_result[-1]),
