@@ -62,15 +62,15 @@ def Unet(pretrained_weights=None, input_size=(None, None, 3), num_classes=3,
     
     conv5 = conv_act_bn_dropout_block(down4_5, num_filters*16, use_deform=True)
     conv5 = conv_act_bn_dropout_block(conv5, num_filters*16, use_deform=True)
-    down5_6 = MaxPooling2D(pool_size=(2, 2))(conv5)
-    
-    conv6 = conv_act_bn_dropout_block(down5_6, num_filters*32, use_deform=True)
-    conv6 = conv_act_bn_dropout_block(conv6, num_filters*32, use_deform=True)
-    
-    up6_5 = conv_act_bn_dropout_block(UpSampling2D(size = (2,2))(conv6), num_filters*16)
-    merge5 = concatenate([conv5, up6_5], axis=3)
-    conv5 = conv_act_bn_dropout_block(merge5, num_filters*16, use_deform=True)
-    conv5 = conv_act_bn_dropout_block(conv5, num_filters*16, use_deform=True)
+    # down5_6 = MaxPooling2D(pool_size=(2, 2))(conv5)
+    # 
+    # conv6 = conv_act_bn_dropout_block(down5_6, num_filters*32, use_deform=True)
+    # conv6 = conv_act_bn_dropout_block(conv6, num_filters*32, use_deform=True)
+    # 
+    # up6_5 = conv_act_bn_dropout_block(UpSampling2D(size = (2,2))(conv6), num_filters*16)
+    # merge5 = concatenate([conv5, up6_5], axis=3)
+    # conv5 = conv_act_bn_dropout_block(merge5, num_filters*16, use_deform=True)
+    # conv5 = conv_act_bn_dropout_block(conv5, num_filters*16, use_deform=True)
     
     up5_4 = conv_act_bn_dropout_block(UpSampling2D(size = (2,2))(conv5), num_filters*8)
     merge4 = concatenate([conv4, up5_4], axis=3)
