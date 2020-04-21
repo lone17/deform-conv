@@ -32,11 +32,13 @@ def Unet(pretrained_weights=None, input_size=(None, None, 3), num_classes=3,
     Conv = partial(Conv, normal_conv_trainable=normal_conv_trainable,
                    use_deform=use_deform, channel_wise=channel_wise)
    
-    def conv_act_bn_dropout_block(input, num_filters, use_deform=True):
+    def conv_act_bn_dropout_block(input, num_filters, use_deform=True,
+                                  use_dropout=False):
         output = Conv(input, num_filters, use_deform=True)
         output = Activation('relu')(output)
         output = BatchNormalization()(output)
-        output = SpatialDropout2D(0.2)(output)
+        if use_dropout:
+            output = SpatialDropout2D(0.2)(output)
         
         return output
     
@@ -54,16 +56,16 @@ def Unet(pretrained_weights=None, input_size=(None, None, 3), num_classes=3,
     conv3 = conv_act_bn_dropout_block(conv3, num_filters*4, use_deform=True)
     down3_4 = MaxPooling2D(pool_size=(2, 2))(conv3)
     
-    conv4 = conv_act_bn_dropout_block(down3_4, num_filters*8)
-    conv4 = conv_act_bn_dropout_block(conv4, num_filters*8)
+    conv4 = conv_act_bn_dropout_block(down3_4, num_filters*8, use_deform=True)
+    conv4 = conv_act_bn_dropout_block(conv4, num_filters*8, use_deform=True)
     down4_5 = MaxPooling2D(pool_size=(2, 2))(conv4)
     
-    conv5 = conv_act_bn_dropout_block(down4_5, num_filters*16)
-    conv5 = conv_act_bn_dropout_block(conv5, num_filters*16)
+    conv5 = conv_act_bn_dropout_block(down4_5, num_filters*16, use_deform=True)
+    conv5 = conv_act_bn_dropout_block(conv5, num_filters*16, use_deform=True)
     down5_6 = MaxPooling2D(pool_size=(2, 2))(conv5)
     
-    conv6 = conv_act_bn_dropout_block(down5_6, num_filters*32)
-    conv6 = conv_act_bn_dropout_block(conv6, num_filters*32)
+    conv6 = conv_act_bn_dropout_block(down5_6, num_filters*32, use_deform=True)
+    conv6 = conv_act_bn_dropout_block(conv6, num_filters*32, use_deform=True)
     
     up6_5 = conv_act_bn_dropout_block(UpSampling2D(size = (2,2))(conv6), num_filters*16)
     merge5 = concatenate([conv5, up6_5], axis=3)

@@ -46,7 +46,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
                       restore_best_weights=True, verbose=1)
     ]
 
-    model_args = dict(input_size=(None, None, 2), num_classes=4, num_filters=4, 
+    model_args = dict(input_size=(None, None, 2), num_classes=4, num_filters=16, 
                       use_deform=use_deform, channel_wise=channel_wise_deform, 
                       normal_conv_trainable=normal_conv_trainable,
                       class_weights=[1, 1, 1, 0.3], loss_weights=[4.0, 0.5],
