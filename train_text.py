@@ -14,9 +14,9 @@ from metrics import *
 from deform_unet import Unet
 from load_data import data_generator
 
-data_generator = partial(data_generator, down_scale=16)
-
-model = None
+data_generator = partial(data_generator mask_type='text',,portion= mask_type='text', portion=down_scale=16)
+ mask_type='text',
+portion=model = None
 
 @click.command()
 @click.option('--pretrained_weights', '-w', default=None)
@@ -56,16 +56,27 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     model = Unet(pretrained_weights, **model_args)
     model.summary()
 
-    model.fit_generator(data_generator('dataset/training_data', 2/3, shuffle=True), 
+    model.fit_generator(data_generator('dataset/training_data', mask_type='text', 
+                                       portion=2/3, shuffle=True), 
                         steps_per_epoch=99, 
-                        validation_data=data_generator('dataset/training_data', -1/3),
+                        validation_data=data_generator('dataset/training_data', 
+                                                       mask_type='text', 
+                                                       portion=-1/3),
                         validation_steps=50,
                         epochs=epochs,
                         callbacks=callbacks)
 
-    train_result = model.evaluate_generator(data_generator('dataset/training_data', 2/3), steps=99)
-    val_result = model.evaluate_generator(data_generator('dataset/training_data', -1/3), steps=50)
-    test_result = model.evaluate_generator(data_generator('dataset/testing_data'), steps=50)
+    train_result = model.evaluate_generator(data_generator('dataset/training_data', 
+                                                           mask_type='text', 
+                                                           portion=2/3), 
+                                            steps=99)
+    val_result = model.evaluate_generator(data_generator('dataset/training_data', 
+                                                         mask_type='text', 
+                                                         portion=-1/3), 
+                                          steps=50)
+    test_result = model.evaluate_generator(data_generator('dataset/testing_data', 
+                                                          mask_type='text'), 
+                                           steps=50)
     print(val_result)
     print(test_result)
 
@@ -77,13 +88,23 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
                           'test{:.4f}'.format(test_result[-1])]) + '.h5'
     model.save(save_path)
     # model.load_weights(save_path)
-    # print(model.evaluate_generator(data_generator('dataset/training_data', -1/3), steps=50))
-    # print(model.evaluate_generator(data_generator('dataset/testing_data'), steps=50))
+    # print(model.evaluate_generator(data_generator('dataset/training_data', 
+    #                                               mask_type='text', 
+    #                                               portion=-1/3), 
+    #                                steps=50))
+    # print(model.evaluate_generator(data_generator('dataset/testing_data', 
+    #                                               mask_type='text'), 
+    #                                portion=steps=50))
     # 
     # del model
     # model = Unet(save_path, **model_args)
-    # print(model.evaluate_generator(data_generator('dataset/training_data', -1/3), steps=50))
-    # print(model.evaluate_generator(data_generator('dataset/testing_data'), steps=50))
+    # print(model.evaluate_generator(data_generator('dataset/training_data', 
+    #                                               mask_type='text', 
+    #                                               portion=-1/3), 
+    #                                steps=50))
+    # print(model.evaluate_generator(data_generator('dataset/testing_data', 
+    #                                               mask_type='text'), 
+    #                                portion=steps=50))
     
 if __name__ == '__main__':
     train()
