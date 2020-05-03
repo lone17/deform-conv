@@ -98,3 +98,4 @@ tags
 dataset/
 *.h5
 *.zip
+*.png

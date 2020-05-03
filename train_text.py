@@ -14,7 +14,7 @@ from metrics import *
 from deform_unet import Unet
 from load_data import data_generator
 
-data_generator = partial(data_generator, down_scale=32)
+data_generator = partial(data_generator, down_scale=16)
 
 model = None
 
@@ -63,14 +63,16 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
                         epochs=epochs,
                         callbacks=callbacks)
 
+    train_result = model.evaluate_generator(data_generator('dataset/training_data', 2/3), steps=99)
     val_result = model.evaluate_generator(data_generator('dataset/training_data', -1/3), steps=50)
     test_result = model.evaluate_generator(data_generator('dataset/testing_data'), steps=50)
     print(val_result)
     print(test_result)
 
-    save_path = '_'.join(['1c_mask2mask' + str(model_args['num_classes']) + 'C',
+    save_path = '_'.join(['text_1c_mask2mask' + str(model_args['num_classes']) + 'C',
                           'nD' if not use_deform else ('D_C' if channel_wise_deform else 'D_nC'),
                           'I' if ignore_background else 'nI',
+                          'train{:.4f}'.format(train_result[-1]),
                           'val{:.4f}'.format(val_result[-1]),
                           'test{:.4f}'.format(test_result[-1])]) + '.h5'
     model.save(save_path)
