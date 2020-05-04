@@ -136,13 +136,17 @@ def data_generator(data_dir, mask_type, portion=1.0, down_scale=16, shuffle=Fals
     
     chosen_keys = sorted(list(image_map.keys()))
     amount = round(len(chosen_keys) * portion)
-    chosen_keys = chosen_keys[:amount]
+    if portion > 0:
+        chosen_keys = chosen_keys[:amount]
+    else:
+        chosen_keys = chosen_keys[amount:]
 
     while True:
         if shuffle:
             random.shuffle(chosen_keys)
         
         for k in chosen_keys:
+            # print(k)
             # image = cv2.imread(image_map[k], cv2.IMREAD_GRAYSCALE) / 255
             # image = 1.0 - image
             image = read_img(image_map[k])
@@ -169,7 +173,7 @@ def data_generator(data_dir, mask_type, portion=1.0, down_scale=16, shuffle=Fals
             yield (input[None, ...], output_masks[None, ...])
 
 if __name__ == '__main__':
-    data_generator('dataset//training_data', mask_type='relation')
+    data_generator('dataset//training_data', mask_type='text')
     # sizes = []
     # max_w, max_h = 0, 0
     # for p in paths.list_images('dataset//training_data//images'):

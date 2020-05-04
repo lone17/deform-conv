@@ -35,11 +35,11 @@ def Unet_text(pretrained_weights=None, input_size=(None, None, 3),
    
     def conv_act_bn_dropout_block(input, num_filters, use_deform=True,
                                   use_dropout=False):
-        output = Conv(input, num_filters, use_deform=use_deform)
+        output = Conv(input, num_filters, use_deform=False)
         output = Activation('relu')(output)
-        output = BatchNormalization()(output)
-        if use_dropout:
-            output = SpatialDropout2D(0.2)(output)
+        # output = BatchNormalization()(output)
+        # if use_dropout:
+        #     output = SpatialDropout2D(0.2)(output)
         
         return output
     
