@@ -51,7 +51,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
                       ignore_background=False)
 
     # global model
-    model = Unet(pretrained_weights, **model_args)
+    model = Unet_relation(pretrained_weights, **model_args)
     model.summary()
 
     model.fit_generator(data_generator('dataset/training_data', mask_type='relation', 

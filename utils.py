@@ -173,8 +173,8 @@ def visualize_data(image_dir, label_dir, out_dir):
             visualizing_image = visualize(image, annotations)
             cv2.imwrite(str(save_path.joinpath(Path(k).name).with_suffix('.png')), 
                         cv2.cvtColor(visualizing_image, cv2.COLOR_BGR2RGB))
-            plt.imshow(visualizing_image)
-            plt.show()
+            # plt.imshow(visualizing_image)
+            # plt.show()
         except Exception as e:
             tb.print_exc()
 

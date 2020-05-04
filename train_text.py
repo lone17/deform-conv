@@ -53,7 +53,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
                       ignore_background=ignore_background)
 
     # global model
-    model = Unet(pretrained_weights, **model_args)
+    model = Unet_text(pretrained_weights, **model_args)
     model.summary()
 
     model.fit_generator(data_generator('dataset/training_data', mask_type='text', 
