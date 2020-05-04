@@ -47,7 +47,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     model_args = dict(input_size=(None, None, 2), num_classes=2, num_filters=16, 
                       use_deform=use_deform, channel_wise=channel_wise_deform, 
                       normal_conv_trainable=normal_conv_trainable,
-                      class_weights=[1, 1], loss_weights=[4.0, 0.5],
+                      class_weights=[1, 1], loss_weights=[2, 1],
                       ignore_background=False)
 
     # global model
@@ -78,7 +78,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     print(val_result)
     print(test_result)
 
-    save_path = '_'.join(['rela_0_mask2mask' + str(model_args['num_classes']) + 'C',
+    save_path = '_'.join(['rela_baselineUnet_mask2mask' + str(model_args['num_classes']) + 'C',
                           'nD' if not use_deform else ('D_C' if channel_wise_deform else 'D_nC'),
                           'train{:.4f}'.format(train_result[-1]),
                           'val{:.4f}'.format(val_result[-1]),
