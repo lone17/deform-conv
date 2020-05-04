@@ -11,7 +11,7 @@ import click
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler, EarlyStopping
 
 from metrics import *
-from deform_unet import Unet
+from deform_unet import Unet_relation
 from load_data import data_generator
 
 data_generator = partial(data_generator, down_scale=16)

@@ -11,12 +11,10 @@ import click
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler, EarlyStopping
 
 from metrics import *
-from deform_unet import Unet
+from deform_unet import Unet_text
 from load_data import data_generator
 
-data_generator = partial(data_generator mask_type='text',,portion= mask_type='text', portion=down_scale=16)
- mask_type='text',
-portion=model = None
+data_generator = partial(data_generator, down_scale=16)
 
 @click.command()
 @click.option('--pretrained_weights', '-w', default=None)
