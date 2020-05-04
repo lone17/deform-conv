@@ -47,8 +47,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     model_args = dict(input_size=(None, None, 2), num_classes=2, num_filters=16, 
                       use_deform=use_deform, channel_wise=channel_wise_deform, 
                       normal_conv_trainable=normal_conv_trainable,
-                      class_weights=[1, 1], loss_weights=[2, 1],
-                      ignore_background=False)
+                      loss_weights=[1.0, 0.5])
 
     # global model
     model = Unet_relation(pretrained_weights, **model_args)
