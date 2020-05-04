@@ -11,7 +11,7 @@ import click
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler, EarlyStopping
 
 from metrics import *
-from deform_unet import Unet
+from deform_unet import Unet_relation
 from load_data import data_generator
 
 data_generator = partial(data_generator, down_scale=16)
@@ -47,8 +47,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     model_args = dict(input_size=(None, None, 2), num_classes=2, num_filters=16, 
                       use_deform=use_deform, channel_wise=channel_wise_deform, 
                       normal_conv_trainable=normal_conv_trainable,
-                      class_weights=[1, 1], loss_weights=[4.0, 0.5],
-                      ignore_background=False)
+                      loss_weights=[1.0, 0.5])
 
     # global model
     model = Unet_relation(pretrained_weights, **model_args)

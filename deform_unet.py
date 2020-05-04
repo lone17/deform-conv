@@ -129,8 +129,7 @@ def Unet_text(pretrained_weights=None, input_size=(None, None, 3),
 def Unet_relation(pretrained_weights=None, input_size=(None, None, 3), 
                   num_classes=3, num_filters=32, use_deform=True, 
                   channel_wise=False, normal_conv_trainable=True, 
-                  class_weights=None, loss_weights=[1.0, 1.0],
-                  ignore_background=False):
+                  loss_weights=[1.0, 1.0]):
     
     global Conv
     Conv = partial(Conv, normal_conv_trainable=normal_conv_trainable,
@@ -196,30 +195,27 @@ def Unet_relation(pretrained_weights=None, input_size=(None, None, 3),
     conv1 = conv_act_bn_dropout_block(merge1, num_filters, use_deform=False)
     conv1 = conv_act_bn_dropout_block(conv1, num_filters, use_deform=False)
     
-    # key_mask = Conv2D(1, 1, activation='sigmoid', name='key_mask', 
-    #                   trainable=normal_conv_trainable)(conv9)
-    # value_mask = Conv2D(1, 1, activation='sigmoid', name='value_mask', 
-    #                     trainable=normal_conv_trainable)(conv9)
+    horizontal_relation_mask = Conv2D(1, 1, activation='sigmoid', 
+                                      name='horizontal_relation_mask')(conv1)
     
-    output_mask = Conv2D(num_classes, (1, 1), activation='softmax', 
-                         name=model_type + '_' + 'output_mask', 
-                         trainable=normal_conv_trainable)(conv1)
+    vertical_relation_mask = Conv2D(1, 1, activation='sigmoid', 
+                                    name='vertical_relation_mask')(conv1)
     
-    model = Model(input=input, outputs=output_mask)
+    model = Model(input=input, 
+                  outputs=[horizontal_relation_mask, vertical_relation_mask])
     
     global IoU_score
-    IoU_score = partial(IoU_score, ignore_last_channel=ignore_background)
+    IoU_score = partial(IoU_score, ignore_last_channel=False)
     IoU_score.__name__ = 'IoU_score'
     
-    global custom_categorical_loss
-    custom_categorical_loss = partial(custom_categorical_loss, 
-                                      class_weights=class_weights,
-                                      loss_weights=loss_weights,
-                                      ignore_last_channel=ignore_background)
-    custom_categorical_loss.__name__ = 'custom_categorical_loss'
+    global custom_loss
+    custom_loss = partial(custom_loss, class_weights=None, 
+                          loss_weights=loss_weights, ignore_last_channel=False)
+    custom_loss.__name__ = 'custom_loss'
     
     model.compile(optimizer=Adam(lr=1e-4), 
-                  loss=custom_categorical_loss, 
+                  loss={'horizontal_relation_mask': custom_loss,
+                        'vertical_relation_mask': custom_loss}, 
                   metrics=['accuracy', IoU_score])
     
     if pretrained_weights:
