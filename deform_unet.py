@@ -202,7 +202,7 @@ def Unet_relation(pretrained_weights=None, input_size=(None, None, 3),
     #                     trainable=normal_conv_trainable)(conv9)
     
     output_mask = Conv2D(num_classes, (1, 1), activation='softmax', 
-                         name=model_type + '_' + 'output_mask', 
+                         name='relation_' + 'output_mask', 
                          trainable=normal_conv_trainable)(conv1)
     
     model = Model(input=input, outputs=output_mask)
