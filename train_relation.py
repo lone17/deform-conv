@@ -36,7 +36,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     
     Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
     # ckpt_path = os.path.join(checkpoint_dir, 'ep{epoch:03d}_key-iou{val_key_mask_IoU_score:.4f}_value-iou{val_value_mask_IoU_score:.4f}.h5')
-    ckpt_path = os.path.join(checkpoint_dir, 'ep{epoch:03d}_loss{val_loss:.4f}_iou{val_IoU_score:.4f}.h5')
+    ckpt_path = os.path.join(checkpoint_dir, 'ep{epoch:03d}_loss{val_loss:.4f}_hor-iou{val_horizontal_relation_mask_IoU_score:.4f}_ver-iou{val_vertical_relation_mask_IoU_score:.4f}.h5')
     callbacks = [
         ModelCheckpoint(ckpt_path, monitor='val_loss',  save_weights_only=False, 
                         save_best_only=True, verbose=1),
@@ -47,7 +47,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     model_args = dict(input_size=(None, None, 2), num_classes=2, num_filters=16, 
                       use_deform=use_deform, channel_wise=channel_wise_deform, 
                       normal_conv_trainable=normal_conv_trainable,
-                      loss_weights=[1.0, 0.5])
+                      loss_weights=[4.0, 0.5])
 
     # global model
     model = Unet_relation(pretrained_weights, **model_args)
