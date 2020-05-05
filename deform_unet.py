@@ -34,12 +34,12 @@ def Unet_text(pretrained_weights=None, input_size=(None, None, 3),
                    channel_wise=channel_wise)
    
     def conv_act_bn_dropout_block(input, num_filters, use_deform=True,
-                                  use_dropout=False):
+                                  dropout=0):
         output = Conv(input, num_filters, use_deform=False)
         output = Activation('relu')(output)
         output = BatchNormalization()(output)
-        # if use_dropout:
-        #     output = SpatialDropout2D(0.2)(output)
+        if dropout > 0:
+            output = SpatialDropout2D(dropout)(output)
         
         return output
     
@@ -58,11 +58,11 @@ def Unet_text(pretrained_weights=None, input_size=(None, None, 3),
     down3_4 = MaxPooling2D(pool_size=(2, 2))(conv3)
     
     conv4 = conv_act_bn_dropout_block(down3_4, num_filters*8, use_deform=True)
-    conv4 = conv_act_bn_dropout_block(conv4, num_filters*8, use_deform=True)
+    conv4 = conv_act_bn_dropout_block(conv4, num_filters*8, use_deform=True, dropout=0.5)
     down4_5 = MaxPooling2D(pool_size=(2, 2))(conv4)
     
     conv5 = conv_act_bn_dropout_block(down4_5, num_filters*16, use_deform=True)
-    conv5 = conv_act_bn_dropout_block(conv5, num_filters*16, use_deform=True)
+    conv5 = conv_act_bn_dropout_block(conv5, num_filters*16, use_deform=True, dropout=0.5)
     # down5_6 = MaxPooling2D(pool_size=(2, 2))(conv5)
     # 
     # conv6 = conv_act_bn_dropout_block(down5_6, num_filters*32, use_deform=True)
@@ -136,12 +136,12 @@ def Unet_relation(pretrained_weights=None, input_size=(None, None, 3),
                    use_deform=use_deform, channel_wise=channel_wise)
    
     def conv_act_bn_dropout_block(input, num_filters, use_deform=True,
-                                  use_dropout=False):
+                                  dropout=0):
         output = Conv(input, num_filters, use_deform=False)
         output = Activation('relu')(output)
         output = BatchNormalization()(output)
-        # if use_dropout:
-        #     output = SpatialDropout2D(0.2)(output)
+        if dropout > 0:
+            output = SpatialDropout2D(dropout)(output)
         
         return output
     
