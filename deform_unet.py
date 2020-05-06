@@ -34,12 +34,12 @@ def Unet_text(pretrained_weights=None, input_size=(None, None, 3),
                    channel_wise=channel_wise)
    
     def conv_act_bn_dropout_block(input, num_filters, use_deform=True,
-                                  use_dropout=False):
+                                  dropout=0):
         output = Conv(input, num_filters, use_deform=use_deform)
         output = Activation('relu')(output)
         output = BatchNormalization()(output)
-        if use_dropout:
-            output = SpatialDropout2D(0.2)(output)
+        if dropout > 0:
+            output = SpatialDropout2D(dropout)(output)
         
         return output
     
@@ -136,12 +136,12 @@ def Unet_relation(pretrained_weights=None, input_size=(None, None, 3),
                    use_deform=use_deform, channel_wise=channel_wise)
    
     def conv_act_bn_dropout_block(input, num_filters, use_deform=True,
-                                  use_dropout=False):
+                                  dropout=0):
         output = Conv(input, num_filters, use_deform=use_deform)
         output = Activation('relu')(output)
         output = BatchNormalization()(output)
-        if use_dropout:
-            output = SpatialDropout2D(0.2)(output)
+        if dropout > 0:
+            output = SpatialDropout2D(dropout)(output)
         
         return output
     
@@ -225,14 +225,14 @@ def Unet_relation(pretrained_weights=None, input_size=(None, None, 3),
     
     return model
 
-# import random
-# h = 1024
-# w = 768
-# n = 1
-# c = 3
-# model = Unet(input_size=(h, w, 3), num_filters=1, use_deform=True)
-# 
-# X = np.random.rand(n, h, w, 3)
-# y = (np.random.rand(n, h, w, 3) > 0.5) * 1.0
-# 
-# model.fit(X, y, epochs=1)
+import random
+h = 1024
+w = 768
+n = 3
+c = 3
+model = Unet_text(input_size=(h, w, 3), num_filters=1, use_deform=True)
+
+X = np.random.rand(n, h, w, 3)
+y = (np.random.rand(n, h, w, 3) > 0.5) * 1.0
+
+model.fit(X, y, epochs=1)
