@@ -45,48 +45,48 @@ def Unet_text(pretrained_weights=None, input_size=(None, None, 3),
     
     input = Input(input_size)
     
-    conv1 = conv_act_bn_dropout_block(input, num_filters, use_deform=True)
-    conv1 = conv_act_bn_dropout_block(conv1, num_filters, use_deform=True)
+    conv1 = conv_act_bn_dropout_block(input, num_filters, use_deform=use_deform)
+    conv1 = conv_act_bn_dropout_block(conv1, num_filters, use_deform=use_deform)
     down1_2 = MaxPooling2D(pool_size=(2, 2))(conv1)
     
-    conv2 = conv_act_bn_dropout_block(down1_2, num_filters*2, use_deform=True)
-    conv2 = conv_act_bn_dropout_block(conv2, num_filters*2, use_deform=True)
+    conv2 = conv_act_bn_dropout_block(down1_2, num_filters*2, use_deform=use_deform)
+    conv2 = conv_act_bn_dropout_block(conv2, num_filters*2, use_deform=use_deform)
     down2_3 = MaxPooling2D(pool_size=(2, 2))(conv2)
     
-    conv3 = conv_act_bn_dropout_block(down2_3, num_filters*4, use_deform=True)
-    conv3 = conv_act_bn_dropout_block(conv3, num_filters*4, use_deform=True)
+    conv3 = conv_act_bn_dropout_block(down2_3, num_filters*4, use_deform=use_deform)
+    conv3 = conv_act_bn_dropout_block(conv3, num_filters*4, use_deform=use_deform)
     down3_4 = MaxPooling2D(pool_size=(2, 2))(conv3)
     
-    conv4 = conv_act_bn_dropout_block(down3_4, num_filters*8, use_deform=True)
-    conv4 = conv_act_bn_dropout_block(conv4, num_filters*8, use_deform=True)
+    conv4 = conv_act_bn_dropout_block(down3_4, num_filters*8, use_deform=use_deform)
+    conv4 = conv_act_bn_dropout_block(conv4, num_filters*8, use_deform=use_deform)
     down4_5 = MaxPooling2D(pool_size=(2, 2))(conv4)
     
-    conv5 = conv_act_bn_dropout_block(down4_5, num_filters*16, use_deform=True)
-    conv5 = conv_act_bn_dropout_block(conv5, num_filters*16, use_deform=True)
+    conv5 = conv_act_bn_dropout_block(down4_5, num_filters*16, use_deform=use_deform)
+    conv5 = conv_act_bn_dropout_block(conv5, num_filters*16, use_deform=use_deform)
     # down5_6 = MaxPooling2D(pool_size=(2, 2))(conv5)
     # 
-    # conv6 = conv_act_bn_dropout_block(down5_6, num_filters*32, use_deform=True)
-    # conv6 = conv_act_bn_dropout_block(conv6, num_filters*32, use_deform=True)
+    # conv6 = conv_act_bn_dropout_block(down5_6, num_filters*32, use_deform=use_deform)
+    # conv6 = conv_act_bn_dropout_block(conv6, num_filters*32, use_deform=use_deform)
     # 
     # up6_5 = conv_act_bn_dropout_block(UpSampling2D(size = (2,2))(conv6), num_filters*16)
     # merge5 = concatenate([conv5, up6_5], axis=3)
-    # conv5 = conv_act_bn_dropout_block(merge5, num_filters*16, use_deform=True)
-    # conv5 = conv_act_bn_dropout_block(conv5, num_filters*16, use_deform=True)
+    # conv5 = conv_act_bn_dropout_block(merge5, num_filters*16, use_deform=use_deform)
+    # conv5 = conv_act_bn_dropout_block(conv5, num_filters*16, use_deform=use_deform)
     
     up5_4 = conv_act_bn_dropout_block(UpSampling2D(size = (2,2))(conv5), num_filters*8)
     merge4 = concatenate([conv4, up5_4], axis=3)
-    conv4 = conv_act_bn_dropout_block(merge4, num_filters*8, use_deform=True)
-    conv4 = conv_act_bn_dropout_block(conv4, num_filters*8, use_deform=True)
+    conv4 = conv_act_bn_dropout_block(merge4, num_filters*8, use_deform=use_deform)
+    conv4 = conv_act_bn_dropout_block(conv4, num_filters*8, use_deform=use_deform)
     
     up4_3 = conv_act_bn_dropout_block(UpSampling2D(size = (2,2))(conv4), num_filters*4)
     merge3 = concatenate([conv3, up4_3], axis=3)
-    conv3 = conv_act_bn_dropout_block(merge3, num_filters*4, use_deform=True)
-    conv3 = conv_act_bn_dropout_block(conv3, num_filters*4, use_deform=True)
+    conv3 = conv_act_bn_dropout_block(merge3, num_filters*4, use_deform=use_deform)
+    conv3 = conv_act_bn_dropout_block(conv3, num_filters*4, use_deform=use_deform)
     
     up3_2 = conv_act_bn_dropout_block(UpSampling2D(size = (2,2))(conv3), num_filters*2)
     merge2 = concatenate([conv2, up3_2], axis=3)
-    conv2 = conv_act_bn_dropout_block(merge2, num_filters*2, use_deform=True)
-    conv2 = conv_act_bn_dropout_block(conv2, num_filters*2, use_deform=True)
+    conv2 = conv_act_bn_dropout_block(merge2, num_filters*2, use_deform=use_deform)
+    conv2 = conv_act_bn_dropout_block(conv2, num_filters*2, use_deform=use_deform)
     
     up2_1 = conv_act_bn_dropout_block(UpSampling2D(size = (2,2))(conv2), num_filters)
     merge1 = concatenate([conv1, up2_1], axis=3)
@@ -230,7 +230,7 @@ def Unet_relation(pretrained_weights=None, input_size=(None, None, 3),
 # w = 768
 # n = 3
 # c = 3
-# model = Unet_text(input_size=(h, w, 3), num_filters=1, use_deform=True)
+# model = Unet_text(input_size=(h, w, 3), num_filters=1, use_deform=True, ignore_background=True)
 # 
 # X = np.random.rand(n, h, w, 3)
 # y = (np.random.rand(n, h, w, 3) > 0.5) * 1.0

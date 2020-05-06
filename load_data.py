@@ -160,7 +160,7 @@ def data_generator(data_dir, mask_type, portion=1.0, down_scale=16, shuffle=Fals
                 resized_grey_image, all_text_mask, *output_masks = mask_cache[k]
                 
                 input = np.dstack([resized_grey_image, all_text_mask])
-                output_masks = np.dstack([resized_grey_image, all_text_mask])
+                output_masks = np.dstack(output_masks)
                 
                 # plt.subplot('121')
                 # plt.imshow(output_masks[..., 0] * 255)
@@ -169,6 +169,7 @@ def data_generator(data_dir, mask_type, portion=1.0, down_scale=16, shuffle=Fals
                 # plt.show()
                 
                 yield (input[None, ...], output_masks[None, ...])
+                
             elif mask_type == 'relation':
                 if k not in mask_cache:
                     mask_cache[k] = image_to_relation_masks(image, annotations, 
@@ -187,7 +188,7 @@ def data_generator(data_dir, mask_type, portion=1.0, down_scale=16, shuffle=Fals
                         'vertical_relation_mask': vertical_relation_mask[None, ...]})
 
 if __name__ == '__main__':
-    data_generator('dataset//training_data', mask_type='relation')
+    data_generator('dataset//training_data', mask_type='text')
     # sizes = []
     # max_w, max_h = 0, 0
     # for p in paths.list_images('dataset//training_data//images'):
