@@ -225,14 +225,14 @@ def Unet_relation(pretrained_weights=None, input_size=(None, None, 3),
     
     return model
 
-import random
-h = 1024
-w = 768
-n = 3
-c = 3
-model = Unet_text(input_size=(h, w, 3), num_filters=1, use_deform=True)
-
-X = np.random.rand(n, h, w, 3)
-y = (np.random.rand(n, h, w, 3) > 0.5) * 1.0
-
-model.fit(X, y, epochs=1)
+# import random
+# h = 1024
+# w = 768
+# n = 3
+# c = 3
+# model = Unet_text(input_size=(h, w, 3), num_filters=1, use_deform=True)
+# 
+# X = np.random.rand(n, h, w, 3)
+# y = (np.random.rand(n, h, w, 3) > 0.5) * 1.0
+# 
+# model.fit(X, y, epochs=1)
