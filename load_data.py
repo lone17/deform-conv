@@ -146,6 +146,7 @@ def data_generator(data_dir, mask_type, portion=1.0, down_scale=16, shuffle=Fals
             random.shuffle(chosen_keys)
         
         for k in chosen_keys:
+            # print(k)
             # image = cv2.imread(image_map[k], cv2.IMREAD_GRAYSCALE) / 255
             # image = 1.0 - image
             image = read_img(image_map[k])
@@ -155,25 +156,35 @@ def data_generator(data_dir, mask_type, portion=1.0, down_scale=16, shuffle=Fals
                 if k not in mask_cache:
                     mask_cache[k] = image_to_text_masks(image, annotations, 
                                                         down_scale)
+                
                 resized_grey_image, all_text_mask, *output_masks = mask_cache[k]
+                
+                input = np.dstack([resized_grey_image, all_text_mask])
+                output_masks = np.dstack([resized_grey_image, all_text_mask])
+                
+                # plt.subplot('121')
+                # plt.imshow(output_masks[..., 0] * 255)
+                # plt.subplot('122')
+                # plt.imshow(output_masks[..., 1])
+                # plt.show()
+                
+                yield (input[None, ...], output_masks[None, ...])
             elif mask_type == 'relation':
                 if k not in mask_cache:
                     mask_cache[k] = image_to_relation_masks(image, annotations, 
                                                             down_scale)
-                (resized_grey_image, 
-                 all_text_mask, 
-                 horizontal_relation_mask, 
-                 vertical_relation_mask) = mask_cache[k]
-            
-            input = np.dstack([resized_grey_image, all_text_mask])
-            # plt.subplot('121')
-            # plt.imshow(output_masks[..., 0] * 255)
-            # plt.subplot('122')
-            # plt.imshow(output_masks[..., 1])
-            # plt.show()
-            yield (input[None, ...], 
-                   {'horizontal_relation_mask': horizontal_relation_mask[None,...],
-                    'vertical_relation_mask': vertical_relation_mask[None, ...]})
+                (
+                    resized_grey_image, 
+                    all_text_mask, 
+                    horizontal_relation_mask, 
+                    vertical_relation_mask
+                ) = mask_cache[k]
+                
+                input = np.dstack([resized_grey_image, all_text_mask])
+                
+                yield (input[None, ...], 
+                       {'horizontal_relation_mask': horizontal_relation_mask[None,...],
+                        'vertical_relation_mask': vertical_relation_mask[None, ...]})
 
 if __name__ == '__main__':
     data_generator('dataset//training_data', mask_type='relation')
