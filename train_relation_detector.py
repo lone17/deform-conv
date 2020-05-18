@@ -11,10 +11,12 @@ import click
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler, EarlyStopping
 
 from metrics import *
-from deform_unet import Unet_text
+from deform_unet import relation_model
 from load_data import data_generator
 
 data_generator = partial(data_generator, down_scale=16)
+
+model = None
 
 @click.command()
 @click.option('--pretrained_weights', '-w', default=None)
@@ -23,15 +25,13 @@ data_generator = partial(data_generator, down_scale=16)
 @click.option('--deform/--no-deform', '-D/-nD', 'use_deform', default=True)
 @click.option('--channel-wise-deform', '-C/-nC', default=False)
 @click.option('--normal-conv-trainable', '-N/-nN', default=True)
-@click.option('--ignore-background', '-I/-nI', default=False)
 def train(pretrained_weights, epochs, checkpoint_dir, use_deform, 
-          channel_wise_deform, normal_conv_trainable, ignore_background):
+          channel_wise_deform, normal_conv_trainable):
 # pretrained_weights=None
 # checkpoint_dir='checkpoint/'
 # use_deform=False
 # normal_conv_trainable=True
 # channel_wise_deform=False
-# ignore_background=False
 # epochs=1
     
     Path(checkpoint_dir).mkdir(parents=True, exist_ok=True)
@@ -44,64 +44,62 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
                       restore_best_weights=True, verbose=1)
     ]
 
-    model_args = dict(input_size=(None, None, 2), num_classes=4, num_filters=16, 
+    model_args = dict(input_size=(None, None, 2), num_classes=2, num_filters=16, 
                       use_deform=use_deform, channel_wise=channel_wise_deform, 
                       normal_conv_trainable=normal_conv_trainable,
-                      class_weights=[1, 1, 1, 0.3], loss_weights=[4.0, 0.5],
-                      ignore_background=ignore_background)
+                      loss_weights=[1.0, 0.5])
 
     # global model
-    model = Unet_text(pretrained_weights, **model_args)
+    model = relation_model(pretrained_weights, **model_args)
     model.summary()
 
-    model.fit_generator(data_generator('dataset/training_data', mask_type='text', 
+    model.fit_generator(data_generator('dataset/training_data', mask_type='relation', 
                                        portion=2/3, shuffle=True), 
                         steps_per_epoch=99, 
                         validation_data=data_generator('dataset/training_data', 
-                                                       mask_type='text', 
+                                                       mask_type='relation', 
                                                        portion=-1/3),
                         validation_steps=50,
                         epochs=epochs,
                         callbacks=callbacks)
 
     train_result = model.evaluate_generator(data_generator('dataset/training_data', 
-                                                           mask_type='text', 
+                                                           mask_type='relation', 
                                                            portion=2/3), 
                                             steps=99)
     val_result = model.evaluate_generator(data_generator('dataset/training_data', 
-                                                         mask_type='text', 
+                                                         mask_type='relation', 
                                                          portion=-1/3), 
                                           steps=50)
     test_result = model.evaluate_generator(data_generator('dataset/testing_data', 
-                                                          mask_type='text'), 
+                                                          mask_type='relation'), 
                                            steps=50)
     print(val_result)
     print(test_result)
 
-    save_path = '_'.join(['text_1c_mask2mask' + str(model_args['num_classes']) + 'C',
+    save_path = '_'.join(['rela_0_mask2mask' + str(model_args['num_classes']) + 'C',
                           'nD' if not use_deform else ('D_C' if channel_wise_deform else 'D_nC'),
-                          'I' if ignore_background else 'nI',
                           'train{:.4f}'.format(train_result[-1]),
                           'val{:.4f}'.format(val_result[-1]),
                           'test{:.4f}'.format(test_result[-1])]) + '.h5'
     model.save(save_path)
     # model.load_weights(save_path)
     # print(model.evaluate_generator(data_generator('dataset/training_data', 
-    #                                               mask_type='text', 
+    #                                               mask_type='relation', 
     #                                               portion=-1/3), 
     #                                steps=50))
     # print(model.evaluate_generator(data_generator('dataset/testing_data', 
-    #                                               mask_type='text'), 
+    #                                               mask_type='relation'), 
     #                                portion=steps=50))
     # 
     # del model
     # model = Unet(save_path, **model_args)
     # print(model.evaluate_generator(data_generator('dataset/training_data', 
-    #                                               mask_type='text', 
+    #                                               mask_type='relation', 
     #                                               portion=-1/3), 
     #                                steps=50))
     # print(model.evaluate_generator(data_generator('dataset/testing_data', 
-    #                                               mask_type='text'), 
+    #                                               mask_type='relation'), 
     #                                portion=steps=50))
     
 if __name__ == '__main__':

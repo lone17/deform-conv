@@ -32,14 +32,15 @@ def image_to_text_masks(image, annotations, down_scale):
     other_mask = np.zeros((img_h, img_w, 1), dtype=np.uint8)
     
     for field in annotations:
-        x1, y1, x2, y2 = (np.array(field['box']) * [ratio_w, ratio_h, ratio_w, ratio_h]).astype(int)
-        all_text_mask[y1:y2, x1:x2] = 1.0
-        if field['label'] == 'question':
-            key_mask[y1:y2, x1:x2] = 1.0
-        elif field['label'] == 'answer':
-            value_mask[y1:y2, x1:x2] = 1.0
-        else:
-            other_mask[y1:y2, x1:x2] = 1.0
+        for word in field['words']:
+            x1, y1, x2, y2 = (np.array(word['box']) * [ratio_w, ratio_h, ratio_w, ratio_h]).astype(int)
+            all_text_mask[y1:y2, x1:x2] = 1.0
+            if field['label'] == 'question':
+                key_mask[y1:y2, x1:x2] = 1.0
+            elif field['label'] == 'answer':
+                value_mask[y1:y2, x1:x2] = 1.0
+            else:
+                other_mask[y1:y2, x1:x2] = 1.0
     background = (1 - key_mask) * (1 - value_mask) * (1 - other_mask)
     # background = (1 - key_mask) * (1 - value_mask)
     
@@ -152,7 +153,25 @@ def data_generator(data_dir, mask_type, portion=1.0, down_scale=16, shuffle=Fals
             image = read_img(image_map[k])
             annotations = read_json(label_map[k])['form']
             
-            if mask_type == 'text':
+            if mask_type == 'text_detection':
+                if k not in mask_cache:
+                    mask_cache[k] = image_to_text_masks(image, annotations, 
+                                                        down_scale)
+                
+                resized_grey_image, all_text_mask, *output_masks = mask_cache[k]
+                
+                input = resized_grey_image[None, ..., None]
+                output = all_text_mask[None, ..., None]
+                
+                # plt.subplot('121')
+                # plt.imshow(output_masks[..., 0] * 255)
+                # plt.subplot('122')
+                # plt.imshow(output_masks[..., 1])
+                # plt.show()
+                
+                yield (input, output)
+            
+            elif mask_type == 'text_classification':
                 if k not in mask_cache:
                     mask_cache[k] = image_to_text_masks(image, annotations, 
                                                         down_scale)
