@@ -54,26 +54,26 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     model = text_classification_model(pretrained_weights, **model_args)
     model.summary()
 
-    model.fit_generator(data_generator('dataset/training_data', mask_type='text', 
+    model.fit_generator(data_generator('dataset/training_data', mask_type='text_classification', 
                                        portion=2/3, shuffle=True), 
                         steps_per_epoch=99, 
                         validation_data=data_generator('dataset/training_data', 
-                                                       mask_type='text', 
+                                                       mask_type='text_classification', 
                                                        portion=-1/3),
                         validation_steps=50,
                         epochs=epochs,
                         callbacks=callbacks)
 
     train_result = model.evaluate_generator(data_generator('dataset/training_data', 
-                                                           mask_type='text', 
+                                                           mask_type='text_classification', 
                                                            portion=2/3), 
                                             steps=99)
     val_result = model.evaluate_generator(data_generator('dataset/training_data', 
-                                                         mask_type='text', 
+                                                         mask_type='text_classification', 
                                                          portion=-1/3), 
                                           steps=50)
     test_result = model.evaluate_generator(data_generator('dataset/testing_data', 
-                                                          mask_type='text'), 
+                                                          mask_type='text_classification'), 
                                            steps=50)
     print(val_result)
     print(test_result)
