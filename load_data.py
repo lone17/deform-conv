@@ -160,8 +160,8 @@ def data_generator(data_dir, mask_type, portion=1.0, down_scale=16, shuffle=Fals
                 
                 resized_grey_image, all_text_mask, *output_masks = mask_cache[k]
                 
-                input = resized_grey_image[..., None]
-                output = all_text_mask[None, ..., None]
+                input = resized_grey_image[None, ..., None]
+                output = all_text_mask[None, ...]
                 
                 # plt.subplot('121')
                 # plt.imshow(output_masks[..., 0] * 255)
