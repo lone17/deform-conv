@@ -100,7 +100,7 @@ def tf_batch_map_coordinates(input, coords, order=1):
 
     def _get_vals_by_coords(input, coords):
         indices = tf.stack([
-            idx, tf_flatten(coords[..., 0]), tf_flatten(coords[..., 1])
+            idx, tf_flatten(coords[..., 1]), tf_flatten(coords[..., 0])
         ], axis=-1)
         vals = tf.gather_nd(input, indices)
         vals = tf.reshape(vals, (batch_size, n_coords))
