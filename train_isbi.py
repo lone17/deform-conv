@@ -19,7 +19,7 @@ model = None
 
 @click.command()
 @click.option('--pretrained_weights', '-w', default=None)
-@click.option('--epochs', '-e', default=1)
+@click.option('--epochs', '-e', default=100)
 @click.option('--checkpoint_dir', '-s', default='checkpoint/')
 @click.option('--deform/--no-deform', '-D/-nD', 'use_deform', default=True)
 @click.option('--channel-wise-deform', '-C/-nC', default=False)
@@ -56,23 +56,38 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     train_image_gen_no_aug = \
         ImageDataGenerator(rescale=1./255)\
         .flow_from_directory('ISBI/train', classes=['image'], target_size=(512, 512),
-                             color_mode='grayscale', class_mode=None, batch_size=25)
+                             color_mode='grayscale', class_mode=None, batch_size=20)
     train_mask_gen_no_aug = \
         ImageDataGenerator(rescale=1./255)\
         .flow_from_directory('ISBI/train', classes=['label'], target_size=(512, 512),
-                             color_mode='grayscale', class_mode=None, batch_size=25)
+                             color_mode='grayscale', class_mode=None, batch_size=20)
     
     train_result = model.evaluate_generator(zip(train_image_gen_no_aug, train_mask_gen_no_aug), 
                                             steps=1)
     
     val_result = model.evaluate_generator(zip(val_image_gen, val_mask_gen), 
                                           steps=1)
+    
+    test_image_gen = \
+        ImageDataGenerator(rescale=1./255)\
+        .flow_from_directory('ISBI/my_test', classes=['image'], target_size=(512, 512),
+                             color_mode='grayscale', class_mode=None, batch_size=5)
+    test_mask_gen = \
+        ImageDataGenerator(rescale=1./255)\
+        .flow_from_directory('ISBI/my_test', classes=['label'], target_size=(512, 512),
+                             color_mode='grayscale', class_mode=None, batch_size=5)
+    
+    test_result = model.evaluate_generator(zip(test_image_gen, test_mask_gen), 
+                                          steps=1)
+    print(train_result)
     print(val_result)
+    print(test_result)
 
     save_path = '_'.join(['ISBI',
                           'nD' if not use_deform else ('D_C' if channel_wise_deform else 'D_nC'),
                           'train{:.4f}'.format(train_result[-1]),
-                          'val{:.4f}'.format(val_result[-1])]) + '.h5'
+                          'val{:.4f}'.format(val_result[-1]),
+                          'test{:.4f}'.format(test_result[-1])]) + '.h5'
     model.save(save_path)
     
 if __name__ == '__main__':
