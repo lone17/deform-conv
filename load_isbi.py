@@ -13,20 +13,20 @@ seed = 17
 train_image_gen = \
     ImageDataGenerator(**data_gen_args)\
     .flow_from_directory('ISBI/train', classes=['image'], target_size=(512, 512),
-                         color_mode='grayscale', class_mode=None, batch_size=32, 
+                         color_mode='grayscale', class_mode=None, batch_size=1, 
                          shuffle=True, seed=seed)
 train_mask_gen = \
     ImageDataGenerator(**data_gen_args)\
     .flow_from_directory('ISBI/train', classes=['label'], target_size=(512, 512),
-                         color_mode='grayscale', class_mode=None, batch_size=32, 
+                         color_mode='grayscale', class_mode=None, batch_size=1, 
                          shuffle=True, seed=seed)
 
 val_image_gen = \
     ImageDataGenerator(rescale=1./255)\
     .flow_from_directory('ISBI/val', classes=['image'], target_size=(512, 512),
-                         color_mode='grayscale', class_mode=None, batch_size=5)
+                         color_mode='grayscale', class_mode=None, batch_size=1)
 val_mask_gen = \
     ImageDataGenerator(rescale=1./255)\
     .flow_from_directory('ISBI/val', classes=['label'], target_size=(512, 512),
-                         color_mode='grayscale', class_mode=None, batch_size=5)
+                         color_mode='grayscale', class_mode=None, batch_size=1)
 

@@ -37,7 +37,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
                       restore_best_weights=True, verbose=1)
     ]
 
-    model_args = dict(input_size=(None, None, 1), num_filters=64, 
+    model_args = dict(input_size=(None, None, 1), num_filters=16, 
                       use_deform=use_deform, channel_wise=channel_wise_deform, 
                       normal_conv_trainable=normal_conv_trainable,
                       loss_weights=[1.0, 0.5])
@@ -47,7 +47,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     model.summary()
 
     model.fit_generator(zip(train_image_gen, train_mask_gen), 
-                        steps_per_epoch=50, 
+                        steps_per_epoch=60, 
                         validation_data=zip(val_image_gen, val_mask_gen),
                         validation_steps=1,
                         epochs=epochs,
@@ -56,29 +56,29 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     train_image_gen_no_aug = \
         ImageDataGenerator(rescale=1./255)\
         .flow_from_directory('ISBI/train', classes=['image'], target_size=(512, 512),
-                             color_mode='grayscale', class_mode=None, batch_size=20)
+                             color_mode='grayscale', class_mode=None, batch_size=1)
     train_mask_gen_no_aug = \
         ImageDataGenerator(rescale=1./255)\
         .flow_from_directory('ISBI/train', classes=['label'], target_size=(512, 512),
-                             color_mode='grayscale', class_mode=None, batch_size=20)
+                             color_mode='grayscale', class_mode=None, batch_size=1)
     
     train_result = model.evaluate_generator(zip(train_image_gen_no_aug, train_mask_gen_no_aug), 
-                                            steps=1)
+                                            steps=20)
     
     val_result = model.evaluate_generator(zip(val_image_gen, val_mask_gen), 
-                                          steps=1)
+                                          steps=5)
     
     test_image_gen = \
         ImageDataGenerator(rescale=1./255)\
         .flow_from_directory('ISBI/my_test', classes=['image'], target_size=(512, 512),
-                             color_mode='grayscale', class_mode=None, batch_size=5)
+                             color_mode='grayscale', class_mode=None, batch_size=1)
     test_mask_gen = \
         ImageDataGenerator(rescale=1./255)\
         .flow_from_directory('ISBI/my_test', classes=['label'], target_size=(512, 512),
-                             color_mode='grayscale', class_mode=None, batch_size=5)
+                             color_mode='grayscale', class_mode=None, batch_size=1)
     
     test_result = model.evaluate_generator(zip(test_image_gen, test_mask_gen), 
-                                          steps=1)
+                                          steps=5)
     print(train_result)
     print(val_result)
     print(test_result)
