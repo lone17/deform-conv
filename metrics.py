@@ -17,7 +17,7 @@ def weighted_binary_crossentropy(y_true, y_pred, class_weights=None):
         class_weights = np.array(class_weights) / np.sum(class_weights)
     
     y_shape = list(K.int_shape(y_pred))
-    if len(class_weights) != y_shape[-1]:
+    if len(class_weights) != 2:
         raise ValueError('''Number of weights ({}) does not match number of 
                          classes ({})'''.format(len(class_weights), y_shape[-1]))
 

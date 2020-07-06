@@ -47,7 +47,7 @@ def train(pretrained_weights, epochs, checkpoint_dir, use_deform,
     model_args = dict(input_size=(None, None, 2), num_classes=4, num_filters=16, 
                       use_deform=use_deform, channel_wise=channel_wise_deform, 
                       normal_conv_trainable=normal_conv_trainable,
-                      class_weights=[1, 1, 1, 0.3], loss_weights=[4.0, 0.5],
+                      class_weights=[1, 1, 1, 0.3], loss_weights=[5.0, 0.5],
                       ignore_background=ignore_background)
 
     # global model
